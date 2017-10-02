@@ -63,12 +63,23 @@ public enum Card{
     this.suit = suit;
   }
 
+  private String face(){
+    switch(rank){
+      case 14: return "A";
+      case 13: return "K";
+      case 12: return "Q";
+      case 11: return "J";
+      case 10: return "T";
+      default: return ""+rank;
+    }
+  }
+
   public String toString(){
     switch(suit){
-      case HEARTS: return rank+"H";
-      case CLUBS: return rank+"C";
-      case DIAMONDS: return rank+"D";
-      case SPADES: return rank+"S";
+      case HEARTS: return face()+"H";
+      case CLUBS: return face()+"C";
+      case DIAMONDS: return face()+"D";
+      case SPADES: return face()+"S";
       default: return ""; 
     }
   }
