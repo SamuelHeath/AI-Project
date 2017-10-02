@@ -57,7 +57,7 @@ class State {
 			while (!suitAvail[2][Agent.SUITMAP.get(cards.get(k).suit)]) {
 				k = rand.nextInt(cards.size());
 			}
-			player_hands[2].add(cards.remove(k)));
+			player_hands[2].add(cards.remove(k));
 		}
 	}
 
