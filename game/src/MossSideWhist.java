@@ -3,6 +3,8 @@ import java.io.*;
 
 public class MossSideWhist{
 
+  public static Map<String, Integer> final_score = new HashMap();  //a map from names to scores
+
   private String leader; //the name of the first player
   private String left; //the name of the second player
   private String right; //the name of the third player
@@ -33,6 +35,7 @@ public class MossSideWhist{
     //set scoreboard to 0
     scoreboard = new HashMap<String, Integer>();
     scoreboard.put(leader, 0);scoreboard.put(left, 0);scoreboard.put(right, 0);
+    final_score.put(leader,0);final_score.put(left,0);final_score.put(right,0);
     //inform players of neighbours.
     p1.setup(left, right);p2.setup(right, leader);p3.setup(leader, left);
   }
@@ -85,6 +88,7 @@ public class MossSideWhist{
   display(leader); display(left); display(right);  
       first = trick(first);
       scoreboard.put(first, scoreboard.get(first)+1);
+      final_score.put(first,final_score.get(first)+1);
     }
     scoreboard.put(leader, scoreboard.get(leader)-8);
     scoreboard.put(left, scoreboard.get(left)-4);
@@ -236,6 +240,8 @@ public class MossSideWhist{
     report.println(left+": "+scoreboard.get(left));
     report.println(right+": "+scoreboard.get(right));
   }
+
+  public static Map<String,Integer> getScores() { return final_score; }
 
   public static void main(String[] args){
     MossSideWhist game = new MossSideWhist(new RandomAgent(), new RandomAgent(), new RandomAgent());
