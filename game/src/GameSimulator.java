@@ -8,8 +8,8 @@ public class GameSimulator {
 
 	public static void main(String[] args) {
 		Map<String,Integer> gameResult;
-		int games = 30000;
-		MossSideWhist game = new MossSideWhist(new RandomAgent(), new RandomAgent(), new RandomAgent());
+		int games = 1;
+		MossSideWhist game = new MossSideWhist(new GreedyAgent(), new RandomAgent(), new RandomAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
 		int i = 0;

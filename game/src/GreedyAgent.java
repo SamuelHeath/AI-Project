@@ -22,6 +22,7 @@ public class GreedyAgent implements MSWAgent{
      * */
     public void seeHand(List<Card> hand, int order) {
         this.hand = hand;
+        Collections.sort(hand,new CardComparator(true));
     }
 
     /**
@@ -31,24 +32,33 @@ public class GreedyAgent implements MSWAgent{
     public Card[] discard() {
         Card[] ditch = new Card[4];
         for (int i = 0; i < 4; i++) {
-            ditch[i] = hand.remove(random.nextInt(hand.size()));
+            ditch[i] = hand.remove(hand.size()-1);
         }
+        System.out.println("PLAYER CARD");
+        for (Card c:hand) System.out.println(c.toString());
         return ditch;
     }
 
     public List<Card> getAvailableCards(Suit lead_suit) {
         List<Card> moves = new LinkedList();
         boolean hasLeadSuit = false;
+        System.out.print("Options: ");
         for (Card c : this.hand) {
             if (c.suit == lead_suit) {
                 hasLeadSuit = true;
                 moves.add(c);
-            } else if (c.suit == Suit.SPADES) moves.add(c);
+                System.out.print(c.toString() + " ");
+            } else if (c.suit == Suit.SPADES) {
+                moves.add(c);
+                System.out.print(c.toString() + " ");
+            }
         }
         if (!hasLeadSuit) {
+            System.out.print(" ALL CARDS ");
             moves.clear();
             moves.addAll(this.hand);
         }
+        System.out.print("\n");
         return moves;
     }
 
@@ -70,6 +80,7 @@ public class GreedyAgent implements MSWAgent{
             bestOption = moves.get(0);
             this.hand.remove(bestOption);
         }
+        System.out.println("Best Option: " + bestOption.toString());
         return bestOption;
     }
 
