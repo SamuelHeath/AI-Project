@@ -4,12 +4,13 @@ import java.io.*;
 public class MossSideWhist{
 
   public static Map<String, Integer> final_score = new HashMap();  //a map from names to scores
+  public static int numDraw = 0;
 
-  private String leader; //the name of the first player
-  private String left; //the name of the second player
-  private String right; //the name of the third player
+  public static String leader; //the name of the first player
+  static String left; //the name of the second player
+  static String right; //the name of the third player
   private Map<String, MSWAgent> agents;  //a map from names to players
-  private Map<String, Integer> scoreboard;  //a map from names to scores
+  static Map<String, Integer> scoreboard;  //a map from names to scores
   private Map<String, ArrayList<Card>> hands;  //a map from names to cards
   private Random rand = new Random();  //using for dealing cards
   private PrintStream report;  //For debugging. Can show hands and moves of each agent to stdout, 
@@ -61,8 +62,11 @@ public class MossSideWhist{
   public void playGame(int rounds, PrintStream report){
     this.report = report;
     for(int i = 0; i<3*rounds; i++){
+      System.out.println("-------------------------------");
       playHand();
       String tmp = leader; leader = left; left = right; right = tmp;
+      getScores();
+      System.out.println("-------------------------------");
     }
   }
 
@@ -88,7 +92,6 @@ public class MossSideWhist{
   display(leader); display(left); display(right);  
       first = trick(first);
       scoreboard.put(first, scoreboard.get(first)+1);
-      final_score.put(first,final_score.get(first)+1);
     }
     scoreboard.put(leader, scoreboard.get(leader)-8);
     scoreboard.put(left, scoreboard.get(left)-4);
@@ -166,7 +169,7 @@ public class MossSideWhist{
     agents.get(leader).seeResult(winner);
     agents.get(left).seeResult(winner);
     agents.get(right).seeResult(winner);
-  report.println(winner+" wins the trick!");  
+  report.println(winner+" wins the trick!");
     return winner;
   }
 
@@ -241,7 +244,33 @@ public class MossSideWhist{
     report.println(right+": "+scoreboard.get(right));
   }
 
-  public static Map<String,Integer> getScores() { return final_score; }
+  public static Map<String,Integer> getScores() {
+    int lead = scoreboard.get(leader);
+    int lft = scoreboard.get(left);
+    int rgt = scoreboard.get(right);
+    scoreboard.put(leader,0);
+    scoreboard.put(left,0);
+    scoreboard.put(right,0);
+    if (lead == lft && lead > rgt) {
+      numDraw++;
+    } else if (lead == rgt && lead > lft) {
+      numDraw++;
+    } else if (rgt == lft && rgt > lead) {
+      numDraw++;
+    }
+    if (lft==rgt && lft == lead && rgt==lead) numDraw++;
+    if (lead > lft && lead > rgt) {
+      final_score.put(leader,final_score.get(leader)+1);
+      System.out.println(leader + " WINS!");
+    } else if (lft > lead && lft > rgt) {
+      final_score.put(left,final_score.get(left)+1);
+      System.out.println(left + " WINS!");
+    } else if (rgt > lead && rgt > lft) {
+      final_score.put(right,final_score.get(right)+1);
+      System.out.println(right + " WINS!");
+    }
+    return final_score;
+  }
 
   public static void main(String[] args){
     MossSideWhist game = new MossSideWhist(new RandomAgent(), new RandomAgent(), new RandomAgent());

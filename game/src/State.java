@@ -7,19 +7,25 @@ class State {
 
 	int[] num_wins;
 	int num_moves; // Number of moves of this trick
-	String playerNext;
+	int player;
+	int playerNext;
 	List<Card> trick;
 	List<Card>[] player_hands = new List[3];
 	Random r = new Random();
 	int max_tricks;
 	List<Card> unseen;
 
-	public State(List<Card> trick, String next_player, List<Card> unseen, List<Card> my_hand) {
+	public State(List<Card> trick, int cur_player, List<Card> unseen, List<Card> my_hand) {
+		this.trick = new LinkedList(trick);
 		num_moves = trick.size();
-		playerNext = next_player;
-		this.unseen = unseen;
-		player_hands[0] = my_hand;
+		player = cur_player;
+		playerNext = (this.player+1)%3;
+		this.unseen = new LinkedList(unseen);
+		player_hands[0] = new LinkedList(my_hand);
+		player_hands[1] = new LinkedList();
+		player_hands[2] = new LinkedList();
 		max_tricks = 6; // 18 Moves ahead
+		num_wins = new int[] {0,0,0};
 	}
 
 	/**
@@ -28,6 +34,7 @@ class State {
 	 */
 	public void determinise(Boolean[][] suitAvail) {
 		List<Card> cards = unseen;
+		System.out.println("Cards to Dist: "+cards.size());
 		//Build-up decks based on information we have gained!
 		int p1 = 0;
 		int p2 = 0;
@@ -37,16 +44,26 @@ class State {
 		Collections.shuffle(unseen);
 
 		//cards SHOULD NOT be empty at this stage. As a result players have even number of cards.
-		if (p1 > p2) {
+		/*if (p1 > p2) {
 			player_hands[2].add(cards.remove(rand.nextInt(cards.size())));
 			p2++;
 		} else {
 			player_hands[1].add(cards.remove(rand.nextInt(cards.size())));
 			p1++;
+		}*/
+
+		if (playerNext != 0 && cards.size() > 0) {
+			int k = rand.nextInt(cards.size());
+			while (!suitAvail[playerNext][Agent.SUITMAP.get(cards.get(k).suit)]) {
+				k = rand.nextInt(cards.size());
+			}
+			player_hands[2].add(cards.remove(k));
 		}
 
 		//This could be dangerous due to while loops.
-		for (int i = 0; i < (cards.size()-p1-p2)/2; i++) {
+		int size = cards.size();
+		for (int i = 0; i < (size-p1-p2)/2; i++) {
+			if (cards.size() == 0) break;
 			int k = rand.nextInt(cards.size());
 			//if player 1 is able to accept this suit then give them this card
 			while (!suitAvail[1][Agent.SUITMAP.get(cards.get(k).suit)]) {
@@ -65,8 +82,8 @@ class State {
 	 * For the current player at this state point what moves can they do?
 	 */
 	public List<Card> availableActions() {
-		List<Card> hand = player_hands[Agent.AGENTMAP.get(playerNext)];
-		if (num_moves == 0) {
+		List<Card> hand = player_hands[player];
+		if (trick.size() == 0) {
 			return hand;
 		} else {
 			Card first = trick.get(0);
@@ -91,25 +108,35 @@ class State {
 	 * @param action
 	 */
 	public void performAction(Card action) {
-		player_hands[Agent.AGENTMAP.get(this.playerNext)].remove(action);
+		this.player_hands[this.player].remove(action);
+		this.unseen.remove(action);
+
 		trick.add(action);
 		if (trick.size() == 3) {
-			//Calc who wins and so who starts the round.
-			calcWinner();
+			//Calc who num_wins and so who starts the round.
+			num_wins[calcWinner()]++;
+			trick.clear();
 		} else {
-			//Next player is the player to the left of the current player
+			setPlayerNext();
 		}
 	}
 
 	private int calcWinner() {
-		Card best = trick.get(0);
+		Card best = trick.get(0); //Index 0 is player to the left of current player
 		Suit s = best.suit;
 		for (int i = 1; i < 3; i++) {
 			Card next = trick.get(i);
 			if (next.suit == best.suit && next.rank > best.rank) best = next;
 			else if (best.suit != Suit.SPADES && next.suit == Suit.SPADES) best = next;
 		}
-		return trick.indexOf(best); //Index tells us which player won.
+		int won = trick.indexOf(best); //Index tells us which player won.
+		if (won == 2) { //this player
+			return this.player;
+		} else if (won == 0) { //playerNext
+			return this.playerNext;
+		} else {
+			return (this.playerNext+1)%3;
+		}
 	}
 
 	public int getWins(int playerIndex) { return num_wins[playerIndex]; }
@@ -124,6 +151,8 @@ class State {
 	 * Chooses who is the next player.
 	 */
 	private void setPlayerNext () {
+		this.player = this.playerNext;
+		this.playerNext = (this.player+1)%3;
 	}
 
 }

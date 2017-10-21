@@ -42,19 +42,15 @@ public class GreedyAgent implements MSWAgent{
     public List<Card> getAvailableCards(Suit lead_suit) {
         List<Card> moves = new LinkedList();
         boolean hasLeadSuit = false;
-        System.out.print("Options: ");
         for (Card c : this.hand) {
             if (c.suit == lead_suit) {
                 hasLeadSuit = true;
                 moves.add(c);
-                System.out.print(c.toString() + " ");
             } else if (c.suit == Suit.SPADES) {
                 moves.add(c);
-                System.out.print(c.toString() + " ");
             }
         }
         if (!hasLeadSuit) {
-            System.out.print(" ALL CARDS ");
             moves.clear();
             moves.addAll(this.hand);
         }
@@ -80,7 +76,6 @@ public class GreedyAgent implements MSWAgent{
             bestOption = moves.get(0);
             this.hand.remove(bestOption);
         }
-        System.out.println("Best Option: " + bestOption.toString());
         return bestOption;
     }
 
