@@ -163,7 +163,9 @@ class NodeComparator implements Comparator<Node> {
 
 	@Override
 	public int compare(Node a, Node b) {
-		return a.num_visits < b.num_visits ? 1 : a.num_visits == b.num_visits ? 0 : -1;
+        // more efficient
+        return a.num_visits - b.num_visits;
+		//return a.num_visits < b.num_visits ? 1 : a.num_visits == b.num_visits ? 0 : -1;
 	}
 }
 
