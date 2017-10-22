@@ -9,7 +9,7 @@ import java.util.List;
 public class Node {
 
 	//Controls how important exploration of the tree is wrt. average value of a node.
-	private static double EXP_FACTOR = 1.0/Math.sqrt(2);
+	private static double EXP_FACTOR = 1.0;//Math.sqrt(2);
 	int num_wins; //num_wins by this PLAYER
 	int num_visits;
 	Node parent;
@@ -17,12 +17,12 @@ public class Node {
 	List<Node> children;
 	int player;
 
-	public Node(Node parent, Card c, int player) {
+	public Node(Node parent, Card card, int player) {
 		this.children = new LinkedList();
 		this.num_wins = 0;
 		this.num_visits = 0;
 		this.parent = parent;
-		this.action = c;
+		this.action = card;
 		this.player = player;
 	}
 
@@ -35,9 +35,13 @@ public class Node {
 	public Node selectChild(List<Card> available) {
 		List<Node> nodes = new LinkedList();
 		for (Node n : children) {
-			if (!available.contains(n.action)) { nodes.add(n); }
+			if (available.contains(n.action)) { nodes.add(n); }
 		}
-		return Collections.max(nodes, new ISUCTComparator());
+		Collections.sort(nodes,new ISUCTComparator());
+		//System.out.println("UCT Scores: ");
+		//for (Node n:nodes) System.out.println(n.ISUCT() + " ");
+		//System.out.println("Selecting: "+nodes.get(nodes.size()-1).ISUCT());
+		return nodes.get(nodes.size()-1);
 	}
 
 	/**
@@ -46,12 +50,13 @@ public class Node {
 	 * @return
 	 */
 	public List<Card> unexploredActions(List<Card> actions) {
+		LinkedList<Card> unexplored = new LinkedList(actions);
 		for (Node n : children) {
-			if (actions.contains(n.action)) {
-				actions.remove(n.action);
+			if (unexplored.contains(n.action)) {
+				unexplored.remove(n.action);
 			}
 		}
-		return actions;
+		return unexplored;
 	}
 
 	/**
@@ -60,8 +65,8 @@ public class Node {
 	 */
 	public double ISUCT() {
 		//Depending on time add heuristic (h(i)) which helps choose nodes via h(i)/num_visits.
-		return (double) num_wins /(double) num_visits + EXP_FACTOR*Math.sqrt(Math.log((double)parent.num_visits)/
-				(double) num_visits);
+		return ((double) num_wins /(double) num_visits) + EXP_FACTOR*Math.sqrt(Math.log((double)parent
+				.num_visits)/(double) num_visits);
 	}
 
 	public Node addChild(Card action, int player) {

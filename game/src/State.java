@@ -34,21 +34,11 @@ class State {
 	 */
 	public void determinise(Boolean[][] suitAvail) {
 		List<Card> cards = unseen;
-		System.out.println("Cards to Dist: "+cards.size());
 		//Build-up decks based on information we have gained!
 
 		//Randomly assign the remaining cards
 		Random rand = new Random();
 		Collections.shuffle(unseen);
-
-		for (int i = 0; i < 3; i++) {
-			System.out.print("Player: " + i);
-			for (int j = 0; j < 4; j ++) {
-				System.out.print(" Suit: " + j + " ");
-				System.out.print(suitAvail[i][j]);
-			}
-			System.out.println();
-		}
 
 		List<Card> cardsForBoth = new LinkedList();
 
@@ -81,7 +71,6 @@ class State {
 				player_hands[1].add(cardsForBoth.get(k));
 			}
 		}
-		System.out.println("Player 1: " + player_hands[1].size() + " Player 2 " + player_hands[2].size());
 	}
 
 	/**
@@ -125,6 +114,49 @@ class State {
 		} else {
 			setPlayerNext();
 		}
+	}
+
+	public List<Card> getWinningCards(List<Card> availableMoves) {
+		if (trick.size() == 0) return availableMoves;
+		Card toBeat = trick.get(0);
+		if (trick.size() == 2) {
+			Card c1 = trick.get(1);
+			if (c1.suit != toBeat.suit && c1.suit == Suit.SPADES) {
+				toBeat = c1;
+			} else if (c1.suit == toBeat.suit && c1.rank > toBeat.rank) {
+				toBeat = c1;
+			}
+		}
+		List<Card> good_moves = new LinkedList();
+		for (Card c:availableMoves) {
+			if (c.suit != toBeat.suit && c.suit == Suit.SPADES) {
+				good_moves.add(c);
+			} else if (c.suit == toBeat.suit && c.rank > toBeat.rank) {
+				good_moves.add(c);
+			}
+		}
+		return good_moves;
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public Card getMove() {
+		List<Card> hand = player_hands[player];
+		Collections.sort(hand,new CardComparator(true));
+		if (trick.size() == 2) {
+			Suit s0 = trick.get(0).suit;
+			Suit s1 = trick.get(1).suit;
+			if (s0 != Suit.SPADES && s1 != Suit.SPADES) {
+				Card bestSpades = null;
+				for (Card c : hand) {
+					if (bestSpades == null) bestSpades = c;
+					if (c.suit == Suit.SPADES && c.rank < bestSpades.rank) return c;
+				}
+			}
+		}
+		return hand.get(0);
 	}
 
 	private int calcWinner() {

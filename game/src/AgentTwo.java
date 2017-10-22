@@ -136,7 +136,7 @@ public class AgentTwo implements MSWAgent {
         // representative of our information set.
         MONode[] playerNode = new MONode[3];
         for (int i = 0; i < playerNode.length; i++) {
-            playerNode[i] = new MONode(null);
+            //playerNode[i] = new MONode(null);
         }
 
         return null;
