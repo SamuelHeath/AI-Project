@@ -35,7 +35,7 @@ public interface MSWAgent{
    * A 50 ms timelimit is given to this function.
    * @param card, the Card played.
    * @param agent, the name of the agent who played the card.
-   * */
+   */
   public void seeCard(Card card, String agent);
 
   /**
@@ -43,7 +43,7 @@ public interface MSWAgent{
    * A 50 ms timelimit is given to this method.
    * This method will be called on each eagent at the end of each trick.
    * @param winner, the player who played the winning card.
-   * */
+   */
   public void seeResult(String winner);
 
   /**
@@ -57,7 +57,7 @@ public interface MSWAgent{
    * Returns the Agents name.
    * A 10ms timelimit is given here.
    * This method will only be called once.
-   * */
+   */
   public String sayName();
 
 }

@@ -5,11 +5,11 @@ import java.util.*;
  */
 public class Agent implements MSWAgent {
 
-	int[] num_wins;
+	private int[] num_wins;
 	private String name = "Carlo Monty";
 	private boolean lead;
-	List<Card> seen = new LinkedList();
-	List<Card> unSeen = new LinkedList();
+	private List<Card> seen = new ArrayList<>(52);
+	private List<Card> unSeen = new ArrayList<>(52);
 	public static Map<String,Integer> AGENTMAP;
 	public static Map<Suit,Integer> SUITMAP;
 	//Boolean[i] is each player Boolean[i][j] is if we assume they have that suit in the order C,D,H,S
@@ -28,7 +28,7 @@ public class Agent implements MSWAgent {
 		SUITMAP.put(Suit.HEARTS,2);
 		SUITMAP.put(Suit.SPADES,3);
 		num_wins = new int[] {0,0,0};
-		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
+		ArrayList<Card> deck = new ArrayList<>(Arrays.asList(Card.values()));
 		Collections.sort(deck); // Can't Remember why I did this
 		for (Card c : deck) unSeen.add(c);
 		hand = new LinkedList();
@@ -47,23 +47,39 @@ public class Agent implements MSWAgent {
 		}
 	}
 
+    /**
+     * This method will be called on the leader agent, after the deal.
+     * If the agent is not the leader, it is sufficient to return an empty array.
+     */
 	public Card[] discard() {
 		if (!lead) {
 			return new Card[] {};
 		} else { //Ditch the lowest rank non-trump cards.
 			CardComparator cardComparator = new CardComparator(true);
-			Collections.sort(hand,cardComparator);
+			Collections.sort(hand, cardComparator);
+			for(Card c : hand) { System.out.print(c); System.out.print(" ");} // DEBUG
 			int count = 0;
 			Card[] ditch = new Card[4];
+			// Ditch four cards but keep the spades.
 			for (int i = 0; i < hand.size() && count < 4; i++) {
 				if (!hand.get(i).suit.equals(Suit.SPADES)) {
-					ditch[count++] = hand.remove(i);
+					System.out.println("Ditching..."); // DEBUG
+					Card d = hand.get(i);
+					System.out.println(d); // DEBUG
+					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
+			// update our hand
 			return ditch;
 		}
 	}
 
+
+    /**
+     * Agent returns the card they wish to play.
+     * A 200 ms timelimit is given for this method
+     * @return the Card they wish to play.
+     */
 	public Card playCard() {
 		long playTime = 200; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
@@ -123,6 +139,13 @@ public class Agent implements MSWAgent {
 		return root_node.children.get(0).action;
 	}
 
+
+    /**
+     * Sees an Agent play a card.
+     * A 50 ms timelimit is given to this function.
+     * @param card, the Card played.
+     * @param agent, the name of the agent who played the card.
+     */
 	public void seeCard(Card card, String agent) {
 		trick.add(card);
 		if (agent != this.name)
@@ -134,6 +157,13 @@ public class Agent implements MSWAgent {
 		}
 	}
 
+
+    /**
+     * See the result of the trick.
+     * A 50 ms timelimit is given to this method.
+     * This method will be called on each eagent at the end of each trick.
+     * @param winner, the player who played the winning card.
+     */
 	public void seeResult(String winner) {
 		trick.clear();
 		if (winner.equals(this.name)) {
@@ -143,7 +173,13 @@ public class Agent implements MSWAgent {
 		}
 	}
 
-	public void seeScore(Map<String,Integer> scores) {
+
+    /**
+     * See the score for each player.
+     * A 50 ms timelimit is givien to this method
+     * @param scoreboard, a Map from agent names to their score.
+     */
+	public void seeScore(Map<String,Integer> scoreboard) {
 		unSeen.clear();
 		hand.clear();
 		playerHasSuit = new Boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
@@ -151,6 +187,11 @@ public class Agent implements MSWAgent {
 		unSeen = new LinkedList(Arrays.asList(Card.values()));
 	}
 
+    /**
+     * Returns the Agents name.
+     * A 10ms timelimit is given here.
+     * This method will only be called once.
+     */
 	public String sayName() {
 		return this.name;
 	}
