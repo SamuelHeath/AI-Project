@@ -12,8 +12,6 @@ public class MOState {
     private Card[] currTrick;
     private int[] tricksWon;
 
-
-
     public MOState(int playerNum, Set<Card> myHand, Set<Card> unseen, Card[] trick) {
         this.unseen = new ArrayList<>(52);
         this.unseen.addAll(unseen);
@@ -29,7 +27,6 @@ public class MOState {
      * Randomly allocate cards to the other hands.
      */
     private void randomizeCards() {
-        Random r = new Random();
         Collections.shuffle(unseen);
         int size = unseen.size() - 4; // four cards were removed.
         int pnum = 2;
@@ -42,6 +39,14 @@ public class MOState {
         }
     }
 
+    public int getScore() {
+        return tricksWon[player];
+    }
+
+    /**
+     * The current player makes a move.
+     * @param c the card they play
+     */
     public void move(Card c) {
         currTrick[nextPlayer] = c;
         hands.get(nextPlayer).remove(c);
@@ -54,7 +59,11 @@ public class MOState {
             currTrick = new Card[3]; // reset trick
             setNextPlayer(win);
 
-            // If the next player has no cards, then the game is over!
+            // No cards left? Then it's game over!
+            // Let's look at the scores ...
+            tricksWon[0] = tricksWon[0] - 8;
+            tricksWon[1] = tricksWon[1] - 4;
+            tricksWon[2] = tricksWon[2] - 4;
         }
     }
 

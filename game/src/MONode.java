@@ -11,16 +11,29 @@ public class MONode {
     private int visitationCount; // why won't my grandchildren visit me?
     private int availabilityCount;
     private double reward;
-    public MONode(MONode parent) {
+    private Card move;
+    private int whoMoved;
+    public MONode(MONode parent, Card move, int whoIsMoving) {
         this.p = parent;
+        this.move = move;
+        this.whoMoved = whoIsMoving;
         this.visitationCount = 0;
         this.reward = 0;
         this.availabilityCount = 0;
         children = new ArrayList<>();
     }
 
-    public void addChild(MONode n) {
-        children.add(n);
+    /**
+     * @param c a card action of this node
+     * @param whoIsMoving who moves after this node?
+     */
+    public void addChild(Card c, int whoIsMoving) {
+        MONode child = new MONode(this, c, whoIsMoving);
+    }
+
+    public MONode selectChild() {
+        // TODO
+        return null;
     }
 
     public void addToVisitCount(int n) {
