@@ -50,33 +50,35 @@ class State {
 			System.out.println();
 		}
 
-		//This could be dangerous due to while loops.
-		int size = cards.size();
+		List<Card> cardsForBoth = new LinkedList();
+
+		int size;
+		if (Agent.lead) size = cards.size();
+		else size = cards.size()-4; //We havent seen which cards were thrown away
 		for (int i = 0; i < size; i++) {
+			if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+				cardsForBoth.add(cards.get(i));
+			} else if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && !suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+				player_hands[1].add(cards.get(i));
+			} else if (!suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+				player_hands[2].add(cards.get(i));
+			}
+		}
+
+		if (cardsForBoth.size() != 0) {
+			int k = rand.nextInt(cardsForBoth.size());
+			player_hands[1].add(cardsForBoth.remove(k));
+		}
+
+		size = cardsForBoth.size();
+		for (int i = 0; i < size; i++) {
+			int k = rand.nextInt(cardsForBoth.size());
 			if (player_hands[1].size() == player_hands[2].size()) {
-				if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)]) {
-					player_hands[1].add(cards.get(i));
-				} else if (suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
-					player_hands[2].add(cards.get(i));
-				} else {
-					System.out.println("ERROR");
-				}
+				player_hands[1].add(cardsForBoth.get(k));
 			} else if (player_hands[1].size() > player_hands[2].size()) {
-				if (suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
-					player_hands[2].add(cards.get(i));
-				} else if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)]) {
-					player_hands[1].add(cards.get(i));
-				} else {
-					System.out.println("Error");
-				}
+				player_hands[2].add(cardsForBoth.get(k));
 			} else {
-				if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)]) {
-					player_hands[1].add(cards.get(i));
-				} else if (suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
-					player_hands[2].add(cards.get(i));
-				} else {
-					System.out.println("ERROR");
-				}
+				player_hands[1].add(cardsForBoth.get(k));
 			}
 		}
 		System.out.println("Player 1: " + player_hands[1].size() + " Player 2 " + player_hands[2].size());
@@ -159,4 +161,11 @@ class State {
 		this.playerNext = (this.player+1)%3;
 	}
 
+	@Override
+	public State clone() {
+		State s = new State(this.trick,this.player,this.unseen,this.player_hands[0]);
+		s.player_hands[1] = new LinkedList(this.player_hands[1]);
+		s.player_hands[2] = new LinkedList(this.player_hands[2]);
+		return s;
+	}
 }

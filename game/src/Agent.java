@@ -5,11 +5,11 @@ import java.util.*;
  */
 public class Agent implements MSWAgent {
 
-	int[] num_wins;
+	private int[] num_wins;
 	private String name = "Carlo Monty";
-	private boolean lead;
-	List<Card> seen = new LinkedList();
-	List<Card> unSeen = new LinkedList();
+	public static boolean lead;
+	private List<Card> seen = new ArrayList<>(52);
+	private List<Card> unSeen = new ArrayList<>(52);
 	public static Map<String,Integer> AGENTMAP;
 	public static Map<Suit,Integer> SUITMAP;
 	//Boolean[i] is each player Boolean[i][j] is if we assume they have that suit in the order C,D,H,S
@@ -28,7 +28,7 @@ public class Agent implements MSWAgent {
 		SUITMAP.put(Suit.HEARTS,2);
 		SUITMAP.put(Suit.SPADES,3);
 		num_wins = new int[] {0,0,0};
-		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
+		ArrayList<Card> deck = new ArrayList<>(Arrays.asList(Card.values()));
 		Collections.sort(deck); // Can't Remember why I did this
 		for (Card c : deck) unSeen.add(c);
 		hand = new LinkedList();
@@ -47,37 +47,54 @@ public class Agent implements MSWAgent {
 		}
 	}
 
+    /**
+     * This method will be called on the leader agent, after the deal.
+     * If the agent is not the leader, it is sufficient to return an empty array.
+     */
 	public Card[] discard() {
 		if (!lead) {
 			return new Card[] {};
 		} else { //Ditch the lowest rank non-trump cards.
 			CardComparator cardComparator = new CardComparator(true);
-			Collections.sort(hand,cardComparator);
+			Collections.sort(hand, cardComparator);
+			for(Card c : hand) { System.out.print(c); System.out.print(" ");} // DEBUG
 			int count = 0;
 			Card[] ditch = new Card[4];
-			for (int i = 0; i < hand.size() && count < 4; i++) {
+			// Ditch four cards but keep the spades.
+			int size = hand.size()-1;
+			for (int i = size; i >= 0 && count < 4; i--) {
 				if (!hand.get(i).suit.equals(Suit.SPADES)) {
-					ditch[count++] = hand.remove(i);
+					System.out.println("Ditching..."); // DEBUG
+					Card d = hand.get(i);
+					System.out.println(d); // DEBUG
+					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
+			for (Card c:ditch) hand.remove(c);
+			// update our hand
 			return ditch;
 		}
 	}
 
+
+    /**
+     * Agent returns the card they wish to play.
+     * A 200 ms timelimit is given for this method
+     * @return the Card they wish to play.
+     */
 	public Card playCard() {
 		long playTime = 200; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node root_node = new Node(null,null, -1);
-		State curr_state = new State(trick,0,unSeen,hand); //0 represents THIS player
-		curr_state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what
-		// others have.
+		State curr_state = new State(trick,0,unSeen,hand); //0 represents THIS playerf
 
 		Random rand = new Random();
 		int x = 0;
-		//while (System.currentTimeMillis()-startTime < playTime) {
+		while (System.currentTimeMillis()-startTime < playTime) {
 			//Information Set Monte Carlo Tree Search updating root_node as we go.
 			Node curr_node = root_node;
-			State state = curr_state;
+			State state = curr_state.clone(); // Copies the state
+			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
 			for (int i = 0; i < 3; i++) {
 				System.out.print("Player " + i + ": ");
 				for (Card c:state.player_hands[i])
@@ -97,7 +114,7 @@ public class Agent implements MSWAgent {
 				//Apply a heuristic to select a better card
 				Collections.sort(actions_to_expand, new CardComparator(true));
 				Card action = actions_to_expand.get(0);
-				System.out.println("Expand: " + action);
+				System.out.println("Expansion: " + action);
 				curr_node = curr_node.addChild(action,state.player);
 				state.performAction(action);
 			}
@@ -107,16 +124,16 @@ public class Agent implements MSWAgent {
 				//Apply heuristic here
 				state.performAction(state.availableActions().get(rand.nextInt(state
 						.availableActions().size())));
-				System.out.println("Stuck");
+				System.out.println("Play Offs");
 			}
 
 			while (curr_node != null) {
 				curr_node.updateNode(state);
 				curr_node = curr_node.parent;
-				System.out.println("Stuck");
+				System.out.println("BackPropagation");
 			}
 			x++;
-		//}
+		}
 		System.out.println(x);
 		System.out.println(System.currentTimeMillis()-startTime);
 		Collections.sort(root_node.children,new NodeComparator());
@@ -125,6 +142,13 @@ public class Agent implements MSWAgent {
 		return root_node.children.get(0).action;
 	}
 
+
+    /**
+     * Sees an Agent play a card.
+     * A 50 ms timelimit is given to this function.
+     * @param card, the Card played.
+     * @param agent, the name of the agent who played the card.
+     */
 	public void seeCard(Card card, String agent) {
 		trick.add(card);
 		if (agent != this.name)
@@ -135,6 +159,13 @@ public class Agent implements MSWAgent {
 		}
 	}
 
+
+    /**
+     * See the result of the trick.
+     * A 50 ms timelimit is given to this method.
+     * This method will be called on each eagent at the end of each trick.
+     * @param winner, the player who played the winning card.
+     */
 	public void seeResult(String winner) {
 		trick.clear();
 		if (winner.equals(this.name)) {
@@ -144,7 +175,13 @@ public class Agent implements MSWAgent {
 		}
 	}
 
-	public void seeScore(Map<String,Integer> scores) {
+
+    /**
+     * See the score for each player.
+     * A 50 ms timelimit is givien to this method
+     * @param scoreboard, a Map from agent names to their score.
+     */
+	public void seeScore(Map<String,Integer> scoreboard) {
 		unSeen.clear();
 		hand.clear();
 		playerHasSuit = new Boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
@@ -152,6 +189,11 @@ public class Agent implements MSWAgent {
 		unSeen = new LinkedList(Arrays.asList(Card.values()));
 	}
 
+    /**
+     * Returns the Agents name.
+     * A 10ms timelimit is given here.
+     * This method will only be called once.
+     */
 	public String sayName() {
 		return this.name;
 	}
@@ -164,7 +206,9 @@ class NodeComparator implements Comparator<Node> {
 
 	@Override
 	public int compare(Node a, Node b) {
-		return a.num_visits < b.num_visits ? 1 : a.num_visits == b.num_visits ? 0 : -1;
+        // more efficient
+        return a.num_visits - b.num_visits;
+		//return a.num_visits < b.num_visits ? 1 : a.num_visits == b.num_visits ? 0 : -1;
 	}
 }
 
