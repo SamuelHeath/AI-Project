@@ -75,7 +75,8 @@ class ISUCTComparator implements Comparator<Node> {
 
 	@Override
 	public int compare(Node a, Node b) {
-		return a.ISUCT() > b.ISUCT() ? -1 : a.ISUCT() < b.ISUCT() ? 1 : 0;
+		return Double.compare(a.ISUCT(), b.ISUCT());
+		//a.ISUCT() > b.ISUCT() ? -1 : a.ISUCT() < b.ISUCT() ? 1 : 0;
 	}
 
 }
