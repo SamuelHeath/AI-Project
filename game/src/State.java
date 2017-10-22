@@ -36,46 +36,50 @@ class State {
 		List<Card> cards = unseen;
 		System.out.println("Cards to Dist: "+cards.size());
 		//Build-up decks based on information we have gained!
-		int p1 = 0;
-		int p2 = 0;
 
 		//Randomly assign the remaining cards
 		Random rand = new Random();
 		Collections.shuffle(unseen);
 
-		//cards SHOULD NOT be empty at this stage. As a result players have even number of cards.
-		/*if (p1 > p2) {
-			player_hands[2].add(cards.remove(rand.nextInt(cards.size())));
-			p2++;
-		} else {
-			player_hands[1].add(cards.remove(rand.nextInt(cards.size())));
-			p1++;
-		}*/
-
-		if (playerNext != 0 && cards.size() > 0) {
-			int k = rand.nextInt(cards.size());
-			while (!suitAvail[playerNext][Agent.SUITMAP.get(cards.get(k).suit)]) {
-				k = rand.nextInt(cards.size());
+		for (int i = 0; i < 3; i++) {
+			System.out.print("Player: " + i);
+			for (int j = 0; j < 4; j ++) {
+				System.out.print(" Suit: " + j + " ");
+				System.out.print(suitAvail[i][j]);
 			}
-			player_hands[2].add(cards.remove(k));
+			System.out.println();
 		}
 
 		//This could be dangerous due to while loops.
 		int size = cards.size();
-		for (int i = 0; i < (size-p1-p2)/2; i++) {
-			if (cards.size() == 0) break;
-			int k = rand.nextInt(cards.size());
-			//if player 1 is able to accept this suit then give them this card
-			while (!suitAvail[1][Agent.SUITMAP.get(cards.get(k).suit)]) {
-				k = rand.nextInt(cards.size());
+		for (int i = 0; i < size; i++) {
+			if (player_hands[1].size() == player_hands[2].size()) {
+				if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)]) {
+					player_hands[1].add(cards.get(i));
+				} else if (suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+					player_hands[2].add(cards.get(i));
+				} else {
+					System.out.println("ERROR");
+				}
+			} else if (player_hands[1].size() > player_hands[2].size()) {
+				if (suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+					player_hands[2].add(cards.get(i));
+				} else if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)]) {
+					player_hands[1].add(cards.get(i));
+				} else {
+					System.out.println("Error");
+				}
+			} else {
+				if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)]) {
+					player_hands[1].add(cards.get(i));
+				} else if (suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+					player_hands[2].add(cards.get(i));
+				} else {
+					System.out.println("ERROR");
+				}
 			}
-			player_hands[1].add(cards.remove(k));
-			k = rand.nextInt(cards.size());
-			while (!suitAvail[2][Agent.SUITMAP.get(cards.get(k).suit)]) {
-				k = rand.nextInt(cards.size());
-			}
-			player_hands[2].add(cards.remove(k));
 		}
+		System.out.println("Player 1: " + player_hands[1].size() + " Player 2 " + player_hands[2].size());
 	}
 
 	/**

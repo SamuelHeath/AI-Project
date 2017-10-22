@@ -107,11 +107,13 @@ public class Agent implements MSWAgent {
 				//Apply heuristic here
 				state.performAction(state.availableActions().get(rand.nextInt(state
 						.availableActions().size())));
+				System.out.println("Stuck");
 			}
 
 			while (curr_node != null) {
 				curr_node.updateNode(state);
 				curr_node = curr_node.parent;
+				System.out.println("Stuck");
 			}
 			x++;
 		//}
@@ -130,7 +132,6 @@ public class Agent implements MSWAgent {
 		if (trick.size() > 1 && trick.get(0).suit != trick.get(trick.size()-1).suit) {
 			//We now have information about who holds the remaining cards of that suit.
 			playerHasSuit[AGENTMAP.get(agent)][SUITMAP.get(trick.get(0).suit)] = false;
-		} else {
 		}
 	}
 

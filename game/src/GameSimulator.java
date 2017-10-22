@@ -9,7 +9,7 @@ public class GameSimulator {
 		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
-		int games = 1;
+		int games = 10;
 		MossSideWhist game = new MossSideWhist(new GreedyAgent(), new Agent(), new GreedyAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
@@ -17,7 +17,7 @@ public class GameSimulator {
 		System.out.println(game.numDraw);
 		for (String s:gameResult.keySet()) {
 			System.out.printf("Agent: %s won %d rounds and %.5f percent\n",s,gameResult.get(s),(double)
-			gameResult.get(s)/(double)((games*3)-game.numDraw)*100.0);
+			gameResult.get(s)/(double)((games*3))*100.0);
 		}
 		//for (Card c:deck)
 			//System.out.println(c.toString());
