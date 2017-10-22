@@ -8,7 +8,7 @@ public class GameSimulator {
 
 	public static void main(String[] args) {
 		Map<String,Integer> gameResult;
-		int games = 1;
+		int games = 9000;
 		MossSideWhist game = new MossSideWhist(new GreedyAgent(), new RandomAgent(), new RandomAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
