@@ -245,30 +245,12 @@ public class MossSideWhist{
   }
 
   public static Map<String,Integer> getScores() {
-    int lead = scoreboard.get(leader);
-    int lft = scoreboard.get(left);
-    int rgt = scoreboard.get(right);
-    scoreboard.put(leader,0);
-    scoreboard.put(left,0);
-    scoreboard.put(right,0);
-    if (lead == lft && lead > rgt) {
-      numDraw++;
-    } else if (lead == rgt && lead > lft) {
-      numDraw++;
-    } else if (rgt == lft && rgt > lead) {
-      numDraw++;
-    }
-    if (lft==rgt && lft == lead && rgt==lead) numDraw++;
-    if (lead > lft && lead > rgt) {
-      final_score.put(leader,final_score.get(leader)+1);
-      System.out.println(leader + " WINS!");
-    } else if (lft > lead && lft > rgt) {
-      final_score.put(left,final_score.get(left)+1);
-      System.out.println(left + " WINS!");
-    } else if (rgt > lead && rgt > lft) {
-      final_score.put(right,final_score.get(right)+1);
-      System.out.println(right + " WINS!");
-    }
+    int lead = scoreboard.get(leader)-8;
+    int lft = scoreboard.get(left)-4;
+    int rgt = scoreboard.get(right)-4;
+    final_score.put(leader,lead);
+    final_score.put(left,lft);
+    final_score.put(right,rgt);
     return final_score;
   }
 
