@@ -38,13 +38,33 @@ public class MONode {
     }
 
     /**
-     * @param c a card action of this node
-     * @param whoIsMoving who moves after this node?
+     * If there exists a child of this node that corresponds
+     * to this action, then return it.
+     * Otherwise, create and return such a child.
+     * @param action a particular action
+     * @param whoIsMoving who's moving at this node
+     * @return a child node of this action
      */
-    public void addChild(Card c, int whoIsMoving) {
+    public MONode findOrCreateChild(Card action, int whoIsMoving) {
+        // Is there one already?
+        for (MONode child : children) {
+            if (child.getMoveMade().equals(action)) {
+                return child;
+            }
+        }
+        // Otherwise, create child.
+        return this.addChild(action, whoIsMoving);
+    }
+
+    /**
+     * @param c a card action of this node
+     * @param whoIsMoving who moves at this node?
+     */
+    public MONode addChild(Card c, int whoIsMoving) {
         MONode child = new MONode(this, c, whoIsMoving);
         children.add(child);
         movesMadeFromHere.add(c);
+        return child;
     }
 
     /**

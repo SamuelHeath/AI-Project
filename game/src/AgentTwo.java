@@ -135,9 +135,11 @@ public class AgentTwo implements MSWAgent {
         // For each player, create a single node tree that is
         // representative of our information set.
         Random rng = new Random();
-        MONode[] playerNodes = new MONode[3];
+        // To ease my pain, let's store two copies (one at the root)
+        MONode[][] playerNodes = new MONode[3][2];
         for (int i = 0; i < playerNodes.length; i++) {
-            playerNodes[i] = new MONode(null, null, playerNum);
+            playerNodes[i][0] = new MONode(null, null, playerNum);
+            playerNodes[i][1] = playerNodes[i][0];
         }
 
         // For n iterations ...
@@ -152,25 +154,31 @@ public class AgentTwo implements MSWAgent {
             // TODO If there's no cards left to play, then the game has
             // TODO necessarily probably ended?
             while (!state.isGameOver() &&
-                    !playerNodes[state.getCurrentPlayer()].
+                    !playerNodes[state.getCurrentPlayer()][1].
                             getUntriedMoves(state.getMoves()).isEmpty()) {
                 // The current player picks an action.
-                MONode n = playerNodes[state.getCurrentPlayer()].
+                MONode n = playerNodes[state.getCurrentPlayer()][1].
                         selectChild(state.getMoves());
-                state.move(n.getMoveMade());
+                Card action = n.getMoveMade();
                 for (int j = 0; j < playerNodes.length; j++) {
-                    // TODO playerNodes[j] = findOrCreateChild ????
+                    // TODO do I really need whoIsMoving?
+                    playerNodes[j][1] = playerNodes[j][1].findOrCreateChild(action,
+                            (state.getCurrentPlayer()+1)%3);
                 }
+                state.move(action);
             }
 
             // EXPAND
-            List<Card> untried = playerNodes[state.getCurrentPlayer()].
+            List<Card> untried = playerNodes[state.getCurrentPlayer()][1].
                     getUntriedMoves(state.getMoves());
             if (!untried.isEmpty()) {
                 // Pick an arbitrary move.
                 Card action = untried.get(rng.nextInt(untried.size()));
                 for (int j = 0; j < playerNodes.length; j++) {
-                    // TODO playerNodes[j] = findOrCreateChild ????
+                    // TODO Do I really need whoIsMoving?
+                    playerNodes[j][1] =
+                            playerNodes[j][1].findOrCreateChild(action,
+                                    (state.getCurrentPlayer()+1)%3);
                 }
                 state.move(action);
             }
@@ -179,22 +187,17 @@ public class AgentTwo implements MSWAgent {
             int worth = simulate(state, rng);
 
             // BACKPROPAGATE
+            // For each player.
             for (int j = 0; j < playerNodes.length; j++) {
-                MONode curr = playerNodes[j];
-                while (curr.getParent() != null) {
-                    curr.addToVisitCount(1);
-                    curr.addToReward(worth);
-                    curr = curr.getParent();
-                }
-                playerNodes[j] = curr;
+                playerNodes[j][1] = backpropagate(playerNodes[j][1], worth);
             }
         }
         // Finally, return the action that has been explored the most.
-        return playerNodes[playerNum].getMostVisitedChild();
+        return playerNodes[playerNum][0].getMostVisitedChild();
     }
 
 
-    /**
+  /**
      * A monte-carlo simulation.
      * @param s the current game state
      * @param r for RNG.
@@ -207,6 +210,16 @@ public class AgentTwo implements MSWAgent {
             s.move(act);
         }
         return s.getScore();
+    }
+
+    private MONode backpropagate(MONode leaf, int reward) {
+        MONode curr = leaf;
+        while (curr.getParent() != null) {
+            curr.addToVisitCount(1);
+            curr.addToReward(reward);
+            curr = curr.getParent();
+        }
+        return curr;
     }
 
     /**
