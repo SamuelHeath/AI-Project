@@ -1,9 +1,14 @@
+import sun.management.resources.agent;
+
 import java.util.*;
 
 /**
  * Created by Sam on 23-Sep-17.
  */
 public class Agent implements MSWAgent {
+
+	public static double explore;
+	private int dep; //number of tricks to look ahead by
 
 	private int[] num_wins;
 	private String name = "Carlo Monty";
@@ -16,6 +21,16 @@ public class Agent implements MSWAgent {
 	Boolean[][] playerHasSuit;
 	List<Card> hand;
 	List<Card> trick;
+
+	public Agent(double exploration, int depth) {
+		explore = exploration;
+		dep = depth;
+	}
+
+	public Agent() {
+		explore = 1.0/Math.sqrt(2);
+		dep = 6;
+	}
 
 	public void setup(String agentLeft, String agentRight) {
 		AGENTMAP = new HashMap();
@@ -83,10 +98,10 @@ public class Agent implements MSWAgent {
      * @return the Card they wish to play.
      */
 	public Card playCard() {
-		long playTime = 2000; // give 200ms to explore and respond.
+		long playTime = 180; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
-		State curr_state = new State(trick,0,this.unSeen,this.hand,3); //0 represents THIS player
+		State curr_state = new State(trick,0,this.unSeen,this.hand,dep); //0 represents THIS player
 
 		/*System.out.println("Trick Size: " + trick.size());
 		System.out.print("My Cards: ");
@@ -116,11 +131,20 @@ public class Agent implements MSWAgent {
 				//Apply a heuristic to select a better card
 				Card action;
 				List<Card> winningMoves = state.getWinningCards(actions_to_expand);
+				/*System.out.print("Trick: ");
+				for (Card c:this.trick) System.out.print(c.toString()+" ");
+				System.out.print(" My Cards: ");
+				for (Card c:hand) System.out.print(c.toString()+ " ");
+				System.out.print(" Selecting Best Cards: ");
+				for (Card c:winningMoves) System.out.print(c.toString()+" ");
+				System.out.println();*/
+
 				if (winningMoves.size() > 0) {
-					action = winningMoves.get(0); //Choose best
+					action = winningMoves.get(rand.nextInt(winningMoves.size())); //Choose from best
 				} else {
 					Collections.sort(actions_to_expand, new CardComparator(true));
-					action = actions_to_expand.get(0); //No winning cards so choose worst we are allowed to play
+					action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning cards so
+					// choose randomly
 				}
 				curr_node = curr_node.addChild(action, state.player);
 				state.performAction(action);
@@ -131,7 +155,8 @@ public class Agent implements MSWAgent {
 				//Apply heuristic here
 				List<Card> winning_moves = state.getWinningCards();
 				//From the moves which will get us a win choose the lowest, if no cards allow us a win play best card
-				if (winning_moves.size() != 0) state.performAction(winning_moves.get(0));
+				if (winning_moves.size() != 0) state.performAction(winning_moves.get(rand.nextInt
+						(winning_moves.size())));
 				else state.performAction(state.getMove());
 			}
 			//System.out.println("-------------");
@@ -143,11 +168,15 @@ public class Agent implements MSWAgent {
 			}
 			x++;
 		}
-		System.out.println("Num Nodes Fully Explored "+x);
+
+		/*System.out.println("Num Nodes Fully Explored "+x);
 		System.out.println("Time: "+(startTime-System.currentTimeMillis()));
 		Collections.sort(curr_node.children,new NodeComparator());
-		Card c = curr_node.children.get(0).action;
-		System.out.println("Playing: " + c.toString());
+		System.out.print("Children: ");
+		for (Node n:curr_node.children) System.out.print(n.action.toString() + " ");
+		System.out.println();*/
+		Card c = curr_node.children.get(curr_node.children.size()-1).action;
+		//System.out.println("Playing: " + c.toString());
 		return c;
 	}
 
