@@ -25,6 +25,18 @@ public class MONode {
         movesMadeFromHere = new HashSet<>();
     }
 
+    public Card getMostVisitedChild() {
+        int vis = children.get(0).getVisitationCount();
+        Card c = children.get(0).getMoveMade();
+
+        for (MONode child : children) {
+            if (child.getVisitationCount() > vis) {
+                c = child.getMoveMade();
+            }
+        }
+        return c;
+    }
+
     /**
      * @param c a card action of this node
      * @param whoIsMoving who moves after this node?
@@ -56,9 +68,15 @@ public class MONode {
      * @return the selected child node.
      */
     public MONode selectChild(List<Card> validMoves, double exploration) {
+        if (children.size() < 1) return null;
         MONode child = children.get(0);
+        double score = calculateScoreOfChild(child, exploration);
+        for (MONode c : children) {
+            double currscore = calculateScoreOfChild(c, exploration);
+            if (currscore > score) child = c;
+        }
         // TODO
-        return null;
+        return child;
     }
 
     /**
@@ -69,7 +87,7 @@ public class MONode {
      */
     private double calculateScoreOfChild(MONode child, double exploration) {
         double mean = (child.getReward() / child.getVisitationCount());
-        double myVisCount = this.visitationCount + child.getAvailabilityCount();
+        double myVisCount = child.getAvailabilityCount();
         double fraction = Math.log(myVisCount) / child.getVisitationCount();
         return mean + (exploration * fraction);
     }
@@ -87,6 +105,10 @@ public class MONode {
         return moves;
     }
 
+    public MONode getParent() {
+        return this.p;
+    }
+
     public void addToVisitCount(int n) {
         this.visitationCount += n;
     }
@@ -101,6 +123,10 @@ public class MONode {
 
     public double getReward() {
         return this.reward;
+    }
+
+    public void addToReward(double n) {
+        this.reward += n;
     }
 
     public int getVisitationCount() {
