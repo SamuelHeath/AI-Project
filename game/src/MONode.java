@@ -72,8 +72,9 @@ public class MONode {
         MONode child = children.get(0);
         double score = calculateScoreOfChild(child, exploration);
         for (MONode c : children) {
-            double currscore = calculateScoreOfChild(c, exploration);
-            if (currscore > score) child = c;
+            double currScore = calculateScoreOfChild(c, exploration);
+            if (currScore > score) child = c;
+            c.addToAvailabilityCount(1);
         }
         // TODO
         return child;

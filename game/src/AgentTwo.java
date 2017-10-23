@@ -149,8 +149,10 @@ public class AgentTwo implements MSWAgent {
             // Terminate when either d is terminal, or the current player
             // has an untried move.
             // TODO that condition can probably be optimised.
+            // TODO If there's no cards left to play, then the game has
+            // TODO necessarily probably ended?
             while (!state.isGameOver() &&
-                    playerNodes[state.getCurrentPlayer()].
+                    !playerNodes[state.getCurrentPlayer()].
                             getUntriedMoves(state.getMoves()).isEmpty()) {
                 // The current player picks an action.
                 MONode n = playerNodes[state.getCurrentPlayer()].
@@ -174,31 +176,37 @@ public class AgentTwo implements MSWAgent {
             }
 
             // SIMULATE by Monte Carlo
-            while (!state.isGameOver()) {
-                // Again, pick any arbitrary action that's possible.
-                List<Card> possibleActions = state.getMoves();
-                Card action = possibleActions.get(
-                        rng.nextInt(possibleActions.size()));
-                state.move(action);
-            }
-            int worth = state.getScore();
+            int worth = simulate(state, rng);
 
             // BACKPROPAGATE
-            for (MONode playerNode : playerNodes) {
-                MONode curr = playerNode;
+            for (int j = 0; j < playerNodes.length; j++) {
+                MONode curr = playerNodes[j];
                 while (curr.getParent() != null) {
                     curr.addToVisitCount(1);
                     curr.addToReward(worth);
                     curr = curr.getParent();
                 }
+                playerNodes[j] = curr;
             }
-       }
+        }
         // Finally, return the action that has been explored the most.
         return playerNodes[playerNum].getMostVisitedChild();
     }
 
-    private MONode[] ISMOMSelect(MONode[] startNodes, MOState s) {
-        return null;
+
+    /**
+     * A monte-carlo simulation.
+     * @param s the current game state
+     * @param r for RNG.
+     * @return the utility of a terminal state
+     */
+    private int simulate(MOState s, Random r) {
+        while (!s.isGameOver()) {
+            List<Card> possAct = s.getMoves();
+            Card act = possAct.get(r.nextInt(possAct.size()));
+            s.move(act);
+        }
+        return s.getScore();
     }
 
     /**
