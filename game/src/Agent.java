@@ -87,7 +87,7 @@ public class Agent implements MSWAgent {
 		long startTime = System.currentTimeMillis();
 		Node root_node = new Node(null,null, -1);
 		State curr_state = new State(trick,0,unSeen,hand); //0 represents THIS playerf
-
+		State root_state = curr_state.clone();
 		Random rand = new Random();
 		int x = 0;
 		while (System.currentTimeMillis()-startTime < playTime) {
@@ -95,17 +95,18 @@ public class Agent implements MSWAgent {
 			Node curr_node = root_node;
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
+
 			for (int i = 0; i < 3; i++) {
 				System.out.print("Player " + i + ": ");
 				for (Card c:state.player_hands[i])
 					System.out.print(c.toString() + " ");
 				System.out.println();
 			}
-			System.out.println(state.availableActions());
-			while (curr_node.unexploredActions(state.availableActions()).size() == 0 &&
-					state.availableActions().size() != 0) {
+			System.out.println(root_state.availableActions());
+			while (curr_node.unexploredActions(root_state.availableActions()).size() == 0 &&
+					root_state.availableActions().size() != 0) {
 
-				curr_node = curr_node.selectChild(state.availableActions());
+				curr_node = curr_node.selectChild(root_state.availableActions());
 				System.out.println("Tree: " + curr_node.action);
 				state.performAction(curr_node.action);
 			}
