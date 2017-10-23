@@ -125,9 +125,8 @@ public class AgentTwo implements MSWAgent {
      */
     @Override
     public Card playCard() {
-
         // TODO
-        return null;
+        return ISMOMCTreeSearch(100);
     }
 
     private Card ISMOMCTreeSearch(int iterations) {
@@ -157,6 +156,8 @@ public class AgentTwo implements MSWAgent {
                     !playerNodes[state.getCurrentPlayer()][1].
                             getUntriedMoves(state.getMoves()).isEmpty()) {
                 // The current player picks an action.
+                System.out.println("Possible moves ...");
+                System.out.println(state.getMoves());
                 MONode n = playerNodes[state.getCurrentPlayer()][1].
                         selectChild(state.getMoves());
                 Card action = n.getMoveMade();
@@ -237,7 +238,9 @@ public class AgentTwo implements MSWAgent {
         if (card.suit != trick[0].suit) {
            // oh-ho-ho! This card doesn't follow suit.
            int pnum = players.get(agent);
-           isValidSuit.get(pnum).put(card.suit, false);
+           if (pnum != playerNum) {
+               isValidSuit.get(pnum).put(card.suit, false);
+           }
         }
     }
 
@@ -250,6 +253,7 @@ public class AgentTwo implements MSWAgent {
     @Override
     public void seeResult(String winner) {
         // TODO
+        currMoveInTrick = 0;
     }
 
     /**

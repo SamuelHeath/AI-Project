@@ -19,6 +19,9 @@ public class MOState {
         this.unseen.addAll(unseen);
         this.player = playerNum;
         hands = new HashMap<>(3);
+        for (int i = 0; i < 3; i++) {
+            hands.put(i, new HashSet<>());
+        }
         hands.put(playerNum, myHand);
         randomizeCards();
         this.currTrick = trick;

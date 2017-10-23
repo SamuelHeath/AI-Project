@@ -10,7 +10,7 @@ public class GameSimulator {
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
 		int games = 2;
-		MossSideWhist game = new MossSideWhist(new Agent(), new RandomAgent(), new GreedyAgent());
+		MossSideWhist game = new MossSideWhist(new AgentTwo(), new RandomAgent(), new GreedyAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
 		int i = 0;
