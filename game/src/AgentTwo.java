@@ -134,16 +134,92 @@ public class AgentTwo implements MSWAgent {
         // TODO
         // For each player, create a single node tree that is
         // representative of our information set.
-        MONode[] playerNode = new MONode[3];
-        for (int i = 0; i < playerNode.length; i++) {
-            //playerNode[i] = new MONode(null);
+        Random rng = new Random();
+        // To ease my pain, let's store two copies (one at the root)
+        MONode[][] playerNodes = new MONode[3][2];
+        for (int i = 0; i < playerNodes.length; i++) {
+            playerNodes[i][0] = new MONode(null, null, playerNum);
+            playerNodes[i][1] = playerNodes[i][0];
         }
 
-        return null;
+        // For n iterations ...
+        for (int i = 0; i < iterations; i++) {
+            // Choose a determinization from our information set.
+            MOState state = new MOState(playerNum, hand, unseen, trick);
+
+            // SELECTION
+            // Terminate when either d is terminal, or the current player
+            // has an untried move.
+            // TODO that condition can probably be optimised.
+            // TODO If there's no cards left to play, then the game has
+            // TODO necessarily probably ended?
+            while (!state.isGameOver() &&
+                    !playerNodes[state.getCurrentPlayer()][1].
+                            getUntriedMoves(state.getMoves()).isEmpty()) {
+                // The current player picks an action.
+                MONode n = playerNodes[state.getCurrentPlayer()][1].
+                        selectChild(state.getMoves());
+                Card action = n.getMoveMade();
+                for (int j = 0; j < playerNodes.length; j++) {
+                    // TODO do I really need whoIsMoving?
+                    playerNodes[j][1] = playerNodes[j][1].findOrCreateChild(action,
+                            (state.getCurrentPlayer()+1)%3);
+                }
+                state.move(action);
+            }
+
+            // EXPAND
+            List<Card> untried = playerNodes[state.getCurrentPlayer()][1].
+                    getUntriedMoves(state.getMoves());
+            if (!untried.isEmpty()) {
+                // Pick an arbitrary move.
+                Card action = untried.get(rng.nextInt(untried.size()));
+                for (int j = 0; j < playerNodes.length; j++) {
+                    // TODO Do I really need whoIsMoving?
+                    playerNodes[j][1] =
+                            playerNodes[j][1].findOrCreateChild(action,
+                                    (state.getCurrentPlayer()+1)%3);
+                }
+                state.move(action);
+            }
+
+            // SIMULATE by Monte Carlo
+            int worth = simulate(state, rng);
+
+            // BACKPROPAGATE
+            // For each player.
+            for (int j = 0; j < playerNodes.length; j++) {
+                playerNodes[j][1] = backpropagate(playerNodes[j][1], worth);
+            }
+        }
+        // Finally, return the action that has been explored the most.
+        return playerNodes[playerNum][0].getMostVisitedChild();
     }
 
-    private MONode ISMOSelect(MONode n) {
-        return null;
+
+  /**
+     * A monte-carlo simulation.
+     * @param s the current game state
+     * @param r for RNG.
+     * @return the utility of a terminal state
+     */
+    private int simulate(MOState s, Random r) {
+        while (!s.isGameOver()) {
+            List<Card> possAct = s.getMoves();
+            Card act = possAct.get(r.nextInt(possAct.size()));
+            s.move(act);
+        }
+        return s.getScore();
+    }
+
+    private MONode backpropagate(MONode leaf, int reward) {
+        MONode curr = leaf;
+        while (curr.getParent() != null) {
+            curr.addToVisitCount(1);
+            curr.addToReward(reward);
+            curr = curr.getParent();
+        }
+        return curr;
     }
 
     /**

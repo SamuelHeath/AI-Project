@@ -8,9 +8,11 @@ public class MOState {
     private List<Card> unseen;
     Map<Integer, Set<Card>> hands;
     private int player;
-    private int nextPlayer = 0; // 0 is the leader, by default
+    private int nextPlayer;
     private Card[] currTrick;
     private int[] tricksWon;
+    private final Suit TRUMP = Suit.SPADES;
+    private boolean gameOver;
 
     public MOState(int playerNum, Set<Card> myHand, Set<Card> unseen, Card[] trick) {
         this.unseen = new ArrayList<>(52);
@@ -21,6 +23,8 @@ public class MOState {
         randomizeCards();
         this.currTrick = trick;
         tricksWon = new int[3];
+        gameOver = false;
+        nextPlayer = playerNum; // If this gets created, I'm playing next.
     }
 
     /**
@@ -39,6 +43,9 @@ public class MOState {
         }
     }
 
+    /**
+     * @return The score of playerNum.
+     */
     public int getScore() {
         return tricksWon[player];
     }
@@ -61,10 +68,15 @@ public class MOState {
 
             // No cards left? Then it's game over!
             // Let's look at the scores ...
+            gameOver = true;
             tricksWon[0] = tricksWon[0] - 8;
             tricksWon[1] = tricksWon[1] - 4;
             tricksWon[2] = tricksWon[2] - 4;
         }
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
     }
 
     /**
@@ -87,23 +99,65 @@ public class MOState {
     private void setNextPlayer(int n) {
         this.nextPlayer = n;
     }
-    private void incrementToNextPlayer() {
+    private void incrementToNextPlayer()
+    {
         this.nextPlayer = (this.nextPlayer + 1)%3;
     }
-
-    public Set<Card> getMoves() {
-        return hands.get(nextPlayer);
+    public int getCurrentPlayer() {
+        return this.nextPlayer;
     }
 
+    /**
+     * Get all valid moves. These are:
+     * If leader, then all cards.
+     * Otherwise:
+     * Cards of the same suit as the first card
+     * If no such card exists, then spades, if any exists
+     * Else, empty list.
+     * @return all valid moves from the current player.
+     */
+    public List<Card> getMoves() {
+        Set<Card> currPlayerHand = hands.get(nextPlayer);
+        // Is the current player the leader?
+        // If so, then they can play any card they want!
+        if (nextPlayer == 0) {
+            return new ArrayList<>(currPlayerHand);
+        }
+
+        // Otherwise, they are quite restricted.
+        Suit validSuit = currTrick[0].suit;
+        List<Card> sameSuit = new ArrayList<>(16);
+        List<Card> spades = new ArrayList<>(16);
+
+        // Iterate over all cards in the player's hand,
+        // adding to the relevant list.
+        for (Card c : currPlayerHand) {
+            if (c.suit == validSuit) {
+                sameSuit.add(c);
+            }
+            else if (c.suit == TRUMP) {
+                spades.add(c);
+            }
+        }
+
+        // Now, let's see what we can play!
+        // If we have at least one of the same suit, then return those cards.
+        // Otherwise, we let them play spades!
+        // ... Otherwise, just do whatever you want.
+        if (sameSuit.size() > 0) return sameSuit;
+        else if (spades.size() > 0) return spades;
+        else return new ArrayList<>(currPlayerHand);
+    }
 }
 
 class MyCardComparator implements Comparator<Card> {
+    private final Suit TRUMP = Suit.SPADES;
 
     @Override
     public int compare(Card o1, Card o2) {
         // Deal with special cases first.
-        if (o1.suit == Suit.SPADES && o2.suit != Suit.SPADES) return 1;
-        if (o1.suit != Suit.SPADES && o2.suit == Suit.SPADES) return -1;
+        if (o1.suit == TRUMP && o2.suit != TRUMP) return 1;
+        if (o1.suit != TRUMP && o2.suit == TRUMP) return -1;
 
         // If neither, or both are spades, then compare by rank instead.
         return o1.rank - o2.rank;
