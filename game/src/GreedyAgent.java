@@ -46,8 +46,6 @@ public class GreedyAgent implements MSWAgent{
             if (c.suit == lead_suit) {
                 hasLeadSuit = true;
                 moves.add(c);
-            } else if (c.suit == Suit.SPADES) {
-                moves.add(c);
             }
         }
         if (!hasLeadSuit) {

@@ -9,7 +9,7 @@ import java.util.List;
 public class Node {
 
 	//Controls how important exploration of the tree is wrt. average value of a node.
-	private static double EXP_FACTOR = 1.0;//Math.sqrt(2);
+	private static double EXP_FACTOR = 1.0/Math.sqrt(2);
 	int num_wins; //num_wins by this PLAYER
 	int num_visits;
 	Node parent;

@@ -83,7 +83,7 @@ public class Agent implements MSWAgent {
      * @return the Card they wish to play.
      */
 	public Card playCard() {
-		long playTime = 200; // give 200ms to explore and respond.
+		long playTime = 195; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
 		State curr_state = new State(trick,0,this.unSeen,this.hand); //0 represents THIS player
