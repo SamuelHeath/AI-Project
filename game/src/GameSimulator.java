@@ -9,14 +9,14 @@ public class GameSimulator {
 		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
-		int games = 2;
-		MossSideWhist game = new MossSideWhist(new Agent(), new RandomAgent(), new GreedyAgent());
+		int games = 10;
+		MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
 		int i = 0;
 		System.out.println(game.numDraw);
 		for (String s:gameResult.keySet()) {
-			System.out.printf("Agent: %s won %d tricks\n", s, gameResult.get(s));
+			System.out.printf("Agent: %s won %d \n", s, gameResult.get(s));
 		}
 		//for (Card c:deck)
 			//System.out.println(c.toString());

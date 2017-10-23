@@ -84,23 +84,18 @@ class State {
 			return hand;
 		} else {
 			Card first = this.trick.get(0);
-			Suit s = first.suit;
 			List<Card> playable = new LinkedList();
-			boolean has_suit = false;
-			for (Card c : hand) {
-				if (c.suit == s) {
-					has_suit = true;
+			if (playerHasSuit(player,first.suit)) {
+				for (Card c : hand) {
 					playable.add(c);
-				} else if (c.suit == Suit.SPADES)
-					playable.add(c);
-			}
-			if (!has_suit) return hand; //We can choose any card, some better than others, e.g. if they
+				}
+			} else return hand; //We can choose any card, some better than others, e.g. if they
 			// cant win this round play a crap card.
 			return playable;
 		}
 	}
 
-	public boolean canGoDeepa() { return this.num_tricks >= this.max_tricks; }
+	public boolean canGoDeepa() { return this.num_tricks <= this.max_tricks; }
 
 	private void printScores() {
 		for (int i = 0; i < num_wins.length; i++) {
@@ -124,6 +119,9 @@ class State {
 			//Calc who num_wins and so who starts the round.
 			int winner = calcWinner();
 			num_wins[winner]++;
+			this.player = winner;
+			this.playerNext = (winner+1)%3;
+			//System.out.println("Player " + winner + ": WINS");
 			//printScores();
 			this.trick.clear();
 			//System.out.println();
@@ -159,20 +157,16 @@ class State {
 			int player_next1 = (player+1)%3;
 			int player_next2 = (player+2)%3;
 			for (Card c:availableMoves) {
-				if (c.suit != Suit.SPADES) {
 					//Convert PlayerHasSuit to bool lookup
-					if (!playerHasSuit(player_next1, c.suit) && !playerHasSuit(player_next2, c.suit) &&
-							!playerHasSuit(player_next1,Suit.SPADES) && !playerHasSuit(player_next1,Suit.SPADES)) {
+					if (!playerHasSuit(player_next1, c.suit) && !playerHasSuit(player_next2, c.suit))
 						bestMoves.add(c);
-					}
-				} else {
-					if (!playerHasSuit(player_next1, c.suit) && !playerHasSuit(player_next2, c.suit)) bestMoves.add(c);
-				}
+
 			}
 			if (bestMoves.size() > 0) return bestMoves;
 			else return availableMoves;
 		}
 		Card toBeat = trick.get(0);
+		Card orig = trick.get(0);
 		if (trick.size() == 1) {
 			int next_player = (player+1)%3;
 			List<Card> hand = player_hands[next_player];
@@ -197,9 +191,9 @@ class State {
 		}
 		List<Card> good_moves = new LinkedList();
 		for (Card c:availableMoves) {
-			if (c.suit != toBeat.suit && c.suit == Suit.SPADES) {
+			if (!playerHasSuit(player,orig.suit) && c.suit == Suit.SPADES && c.rank > toBeat.rank) {
 				good_moves.add(c);
-			} else if (c.suit == toBeat.suit && c.rank > toBeat.rank) {
+			} else if (playerHasSuit(player,orig.suit) && c.suit == orig.suit && c.rank > toBeat.rank) {
 				good_moves.add(c);
 			}
 		}
@@ -216,18 +210,16 @@ class State {
 		if (this.trick.size() > 0 && playerHasSuit(player,trick.get(0).suit)) {
 			List<Card> winners = getWinningCards();
 			if (trick.size() == 2 && winners.size() > 0) {
-				return winners.get(winners.size()-1);
+				return winners.get(r.nextInt(winners.size()));
 			}
 			List<Card> actions = availableActions();
-			Random rand = new Random();
-			best = actions.get(rand.nextInt(actions.size()));
+			best = actions.get(r.nextInt(actions.size()));
 			for (Card c:actions) {
 				if (best.rank < c.rank) best = c;
 			}
 		} else {
 			List<Card> hand = player_hands[player];
-			Collections.sort(hand, new CardComparator(true));
-			best = hand.get(0);
+			best = hand.get(r.nextInt(hand.size()));
 		}
 		return best;
 	}
@@ -244,6 +236,9 @@ class State {
 			else if (!playerHasSuit(curr_player,s) && best.suit != Suit.SPADES && next.suit == Suit.SPADES) best = next;
 		}
 		int won = trick.indexOf(best); //Index tells us which player won.
+		/*System.out.println("Index of best card: " + won);
+		System.out.println("Curr Player: " + player);
+		System.out.println("Next Player: " + playerNext);*/
 		if (won == 2) { //this player
 			return this.player;
 		} else if (won == 0) { //playerNext
