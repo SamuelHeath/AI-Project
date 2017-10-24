@@ -24,14 +24,14 @@ public class GameSimulatorGA {
 		Collections.sort(deck, new CardComparator(true));
 
 		int games = 3;
-		MossSideWhist game = new MossSideWhist(testingAgent, new GreedyNaive(), new GreedyNaive());
-		game.playGame(games, System.out);
-		gameResult =  game.getScores();
-		int i = 0;
-		System.out.println(game.numDraw);
-		for (String s:gameResult.keySet()) {
-			System.out.printf("Agent: %s won %d \n", s, gameResult.get(s));
-		}
+		//MossSideWhist game = new MossSideWhist(testingAgent, new GreedyNaive(), new GreedyNaive());
+		//game.playGame(games, System.out);
+		//gameResult =  game.getScores();
+		//int i = 0;
+		//System.out.println(game.numDraw);
+		//for (String s:gameResult.keySet()) {
+		//	System.out.printf("Agent: %s won %d \n", s, gameResult.get(s));
+		//}
 		//for (Card c:deck)
 		//System.out.println(c.toString());
 	}

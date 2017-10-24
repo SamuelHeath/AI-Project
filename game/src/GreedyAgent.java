@@ -99,7 +99,7 @@ public class GreedyAgent implements MSWAgent{
     }
 
     public String sayName() {
-        return this.agent_name;
+        return this.agent_name + random.nextInt(1000);
     }
 
 }

@@ -21,6 +21,7 @@ public class AgentTwo implements MSWAgent {
     private Map<Integer, EnumMap<Suit, Boolean>> isValidSuit;
     private String playerToLeft;
     private Map<String, Integer> players;
+    private int firstPlayer;
 
     /**
      * Tells the agent the names of the competing agents, and their relative position.
@@ -45,6 +46,7 @@ public class AgentTwo implements MSWAgent {
     @Override
     public void seeHand(List<Card> hand, int order) {
         this.playerNum = order;
+        this.firstPlayer = 0;
         // Set up my hand, as well as instantiate the 'seen' and 'unseen' cards
         this.hand = new HashSet<>(hand);
         this.seen = new HashSet<>(hand);
@@ -96,7 +98,7 @@ public class AgentTwo implements MSWAgent {
             return new Card[]{};
         }
         // Discard greedily, choosing the worst four cards.
-        // TODO is there a better way? probably.
+        // TODO is there a better way? probably. Even MCTS here?
         Comparator<Card> cc = new CardComparator(true);
         List<Card> cards = new ArrayList<>(hand);
         cards.sort(cc);
@@ -126,7 +128,10 @@ public class AgentTwo implements MSWAgent {
     @Override
     public Card playCard() {
         // TODO
-        return ISMOMCTreeSearch(100);
+        long t = System.currentTimeMillis();
+        Card c = ISMOMCTreeSearch(500);
+        System.out.println((System.currentTimeMillis() - t));
+        return c;
     }
 
     private Card ISMOMCTreeSearch(int iterations) {
@@ -144,7 +149,8 @@ public class AgentTwo implements MSWAgent {
         // For n iterations ...
         for (int i = 0; i < iterations; i++) {
             // Choose a determinization from our information set.
-            MOState state = new MOState(playerNum, hand, unseen, trick);
+            MOState state = new MOState(playerNum, firstPlayer,
+                    hand, unseen, trick);
 
             // SELECTION
             // Terminate when either d is terminal, or the current player
@@ -153,11 +159,9 @@ public class AgentTwo implements MSWAgent {
             // TODO If there's no cards left to play, then the game has
             // TODO necessarily probably ended?
             while (!state.isGameOver() &&
-                    !playerNodes[state.getCurrentPlayer()][1].
+                    playerNodes[state.getCurrentPlayer()][1].
                             getUntriedMoves(state.getMoves()).isEmpty()) {
                 // The current player picks an action.
-                System.out.println("Possible moves ...");
-                System.out.println(state.getMoves());
                 MONode n = playerNodes[state.getCurrentPlayer()][1].
                         selectChild(state.getMoves());
                 Card action = n.getMoveMade();
@@ -170,6 +174,7 @@ public class AgentTwo implements MSWAgent {
             }
 
             // EXPAND
+            // If we have moves that are untried, then let's try them!
             List<Card> untried = playerNodes[state.getCurrentPlayer()][1].
                     getUntriedMoves(state.getMoves());
             if (!untried.isEmpty()) {
@@ -232,10 +237,13 @@ public class AgentTwo implements MSWAgent {
     @Override
     public void seeCard(Card card, String agent) {
         // TODO
-        trick[currMoveInTrick++] = card;
+        trick[players.get(agent)] = card;
         moveUnseenToSeen(card);
-
-        if (card.suit != trick[0].suit) {
+        // If my card, then remove it from my hand.
+        if (agent == this.NAME) {
+            hand.remove(card);
+        }
+        if (card.suit != trick[firstPlayer].suit) {
            // oh-ho-ho! This card doesn't follow suit.
            int pnum = players.get(agent);
            if (pnum != playerNum) {
@@ -253,7 +261,10 @@ public class AgentTwo implements MSWAgent {
     @Override
     public void seeResult(String winner) {
         // TODO
+        // Reset the tricks.
         currMoveInTrick = 0;
+        trick = new Card[3];
+        firstPlayer = players.get(winner);
     }
 
     /**

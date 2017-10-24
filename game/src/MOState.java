@@ -13,37 +13,67 @@ public class MOState {
     private int[] tricksWon;
     private final Suit TRUMP = Suit.SPADES;
     private boolean gameOver;
+    private int firstPlayer;
 
-    public MOState(int playerNum, Set<Card> myHand, Set<Card> unseen, Card[] trick) {
+    public MOState(int playerNum, int firstPlayer,
+                   Set<Card> myHand, Set<Card> unseen, Card[] trick) {
         this.unseen = new ArrayList<>(52);
         this.unseen.addAll(unseen);
+        this.tricksWon = new int[3];
+        this.gameOver = false;
+        this.nextPlayer = playerNum; // If this gets created, I've been asked to play.
         this.player = playerNum;
-        hands = new HashMap<>(3);
+        this.hands = new HashMap<>(3);
         for (int i = 0; i < 3; i++) {
-            hands.put(i, new HashSet<>());
+            this.hands.put(i, new HashSet<>());
         }
-        hands.put(playerNum, myHand);
+        this.hands.put(playerNum, new HashSet<>(myHand));
+        this.firstPlayer = firstPlayer;
         randomizeCards();
-        this.currTrick = trick;
-        tricksWon = new int[3];
-        gameOver = false;
-        nextPlayer = playerNum; // If this gets created, I'm playing next.
-    }
+        this.currTrick = trick.clone();
+   }
 
     /**
      * Randomly allocate cards to the other hands.
      */
     private void randomizeCards() {
         Collections.shuffle(unseen);
-        int size = unseen.size() - 4; // four cards were removed.
-        int pnum = 2;
-        for (int c = 0; c < size; c++) {
-            // Start allocating at player 2, because they go last in a round
-            // so they might be allowed an extra card.
-            if (pnum == this.player) continue;
-            hands.get(pnum).add(unseen.get(c++));
-            pnum = (pnum-1)%3;
+        Random r = new Random();
+        // If I'm the leader, then I know that the set of unseen cards
+        // is the set of cards allocated to the opponents.
+        // Otherwise, account for discards.
+        int numberRemainingInUnseen = player == 0 ? 0 : 4;
+        int pnum = roundModulus(firstPlayer - 1, 3);
+        while (unseen.size() > numberRemainingInUnseen) {
+            if (pnum == this.player) {
+                pnum = roundModulus(pnum-1, 3);
+                continue;
+            }
+            hands.get(pnum).add(unseen.remove(r.nextInt(unseen.size())));
+            pnum = roundModulus(pnum-1,3);
         }
+        /*
+        for (int c = 0; c < size; c++) {
+            // Start allocating at the last player, because they go last in a round
+            // so they might be allowed an extra card.
+            // TODO In allocation, we should also consider what suits are valid.
+            if (pnum == this.player) {
+                c--; // de-allocate
+                pnum = roundModulus(pnum-1, 3);
+                continue;
+            }
+            hands.get(pnum).add(unseen.get(c));
+            pnum = roundModulus(pnum-1,3);
+        }
+        */
+    }
+
+    /**
+     * Negative numbers don't wrap back. This makes it wrap back.
+     * @param n
+     */
+    private int roundModulus(int n, int wrap) {
+        return ((n%wrap)+wrap)%wrap;
     }
 
     /**
@@ -68,14 +98,16 @@ public class MOState {
             tricksWon[win]++;
             currTrick = new Card[3]; // reset trick
             setNextPlayer(win);
-
+            firstPlayer = win;
             // No cards left? Then it's game over!
             // Let's look at the scores ...
-            gameOver = true;
-            tricksWon[0] = tricksWon[0] - 8;
-            tricksWon[1] = tricksWon[1] - 4;
-            tricksWon[2] = tricksWon[2] - 4;
-        }
+            if (getMoves().isEmpty()) {
+                gameOver = true;
+                tricksWon[0] = tricksWon[0] - 8;
+                tricksWon[1] = tricksWon[1] - 4;
+                tricksWon[2] = tricksWon[2] - 4;
+            }
+       }
     }
 
     public boolean isGameOver() {
@@ -106,6 +138,7 @@ public class MOState {
     {
         this.nextPlayer = (this.nextPlayer + 1)%3;
     }
+
     public int getCurrentPlayer() {
         return this.nextPlayer;
     }
@@ -121,14 +154,14 @@ public class MOState {
      */
     public List<Card> getMoves() {
         Set<Card> currPlayerHand = hands.get(nextPlayer);
-        // Is the current player the leader?
+        // Is the current player the first player?
         // If so, then they can play any card they want!
-        if (nextPlayer == 0) {
+        if (currTrick[firstPlayer] == null) {
             return new ArrayList<>(currPlayerHand);
         }
 
         // Otherwise, they are quite restricted.
-        Suit validSuit = currTrick[0].suit;
+        Suit validSuit = currTrick[firstPlayer].suit;
         List<Card> sameSuit = new ArrayList<>(16);
         List<Card> spades = new ArrayList<>(16);
 
@@ -150,6 +183,10 @@ public class MOState {
         if (sameSuit.size() > 0) return sameSuit;
         else if (spades.size() > 0) return spades;
         else return new ArrayList<>(currPlayerHand);
+    }
+
+    public List<Card> getHand(int i) {
+        return new ArrayList<>(hands.get(i));
     }
 }
 
