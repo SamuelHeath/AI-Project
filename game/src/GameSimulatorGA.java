@@ -22,8 +22,8 @@ public class GameSimulatorGA {
 	public void run() {
 		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
 		Collections.sort(deck, new CardComparator(true));
-		int games = 5;
-		MossSideWhist game = new MossSideWhist(testingAgent, new GreedyAgent(), new GreedyAgent());
+		int games = 1;
+		MossSideWhist game = new MossSideWhist(testingAgent, new GreedyNaive(), new GreedyNaive());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
 		int i = 0;

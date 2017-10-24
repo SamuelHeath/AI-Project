@@ -18,7 +18,7 @@ public class Agent implements MSWAgent {
 	public static Map<String,Integer> AGENTMAP;
 	public static Map<Suit,Integer> SUITMAP;
 	//Boolean[i] is each player Boolean[i][j] is if we assume they have that suit in the order C,D,H,S
-	Boolean[][] playerHasSuit;
+	boolean[][] playerHasSuit;
 	List<Card> hand;
 	List<Card> trick;
 
@@ -29,7 +29,7 @@ public class Agent implements MSWAgent {
 
 	public Agent() {
 		explore = 1.0/Math.sqrt(2);
-		dep = 6;
+		dep = 4;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
@@ -48,7 +48,7 @@ public class Agent implements MSWAgent {
 		for (Card c : deck) unSeen.add(c);
 		hand = new LinkedList();
 		trick = new LinkedList();
-		playerHasSuit = new Boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
+		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
 	}
 
 	public void seeHand(List<Card> hand, int order) {
@@ -101,7 +101,7 @@ public class Agent implements MSWAgent {
 		long playTime = 180; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
-		State curr_state = new State(trick,0,this.unSeen,this.hand,dep); //0 represents THIS player
+		State curr_state = new State(trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0 represents THIS player
 
 		/*System.out.println("Trick Size: " + trick.size());
 		System.out.print("My Cards: ");
@@ -223,7 +223,7 @@ public class Agent implements MSWAgent {
 	public void seeScore(Map<String,Integer> scoreboard) {
 		unSeen.clear();
 		hand.clear();
-		playerHasSuit = new Boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
+		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
 		lead = false;
 		unSeen = new LinkedList(Arrays.asList(Card.values()));
 	}

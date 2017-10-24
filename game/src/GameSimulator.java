@@ -9,8 +9,8 @@ public class GameSimulator {
 		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
-		int games = 10;
-		MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
+		int games = 20;
+		MossSideWhist game = new MossSideWhist(new Agent(), new GreedyNaive(), new GreedyAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
 		int i = 0;

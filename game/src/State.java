@@ -15,9 +15,11 @@ class State {
 	int num_tricks;
 	int max_tricks;
 	List<Card> unseen;
+	boolean[][] player_has_suit;
 
-	public State(List<Card> trick, int cur_player, List<Card> unseen, List<Card> my_hand, int max_depth) {
+	public State(List<Card> trick, int cur_player, List<Card> unseen, List<Card> my_hand, int max_depth,boolean[][] suits) {
 		this.trick = new LinkedList(trick);
+		this.player_has_suit = suits.clone();
 		num_moves = trick.size();
 		player = cur_player;
 		playerNext = (this.player+1)%3;
@@ -34,7 +36,7 @@ class State {
 	 * Determinise the root game state by taking the Imperfect Game Info and convert it into a Perfect
 	 * Info game.
 	 */
-	public void determinise(Boolean[][] suitAvail) {
+	public void determinise(boolean[][] suitAvail) {
 		List<Card> cards = unseen;
 		//Build-up decks based on information we have gained!
 
@@ -113,6 +115,9 @@ class State {
 	public void performAction(Card action) {
 		this.player_hands[this.player].remove(action);
 		this.unseen.remove(action);
+		if (trick.size() > 0 && trick.get(0).suit != action.suit) {
+			this.player_has_suit[this.player][Agent.SUITMAP.get(trick.get(0).suit)] = false;
+		}
 		//System.out.println("Player " + player + ": " + action.toString());
 		this.trick.add(action);
 		if (this.trick.size() == 3) {
@@ -141,10 +146,7 @@ class State {
 	}
 
 	public boolean playerHasSuit(int player_index, Suit searchSuit) {
-		for (Card c:player_hands[player_index]) {
-			if (c.suit == searchSuit) return true;
-		}
-		return false;
+		return this.player_has_suit[player_index][Agent.SUITMAP.get(searchSuit)];
 	}
 
 	public List<Card> getWinningCards() {
@@ -169,14 +171,13 @@ class State {
 		Card orig = trick.get(0);
 		if (trick.size() == 1) {
 			int next_player = (player+1)%3;
-			List<Card> hand = player_hands[next_player];
 			List<Card> bestMoves = new LinkedList();
 			if (playerHasSuit(next_player,toBeat.suit)) {
 
-			} else if (toBeat.suit != Suit.SPADES && playerHasSuit(next_player,Suit.SPADES)) {
+			} else if (toBeat.suit != Suit.SPADES && !playerHasSuit(player,toBeat.suit) && playerHasSuit(next_player,Suit.SPADES)) {
 				Card bestNextCard = getBestCardFromSuit(next_player,Suit.SPADES);
 				for (Card c:availableMoves) {
-					if (c.suit == Suit.SPADES && c.rank > bestNextCard.rank)bestMoves.add(c);
+					if (bestNextCard != null && c.suit == Suit.SPADES && c.rank > bestNextCard.rank)bestMoves.add(c);
 				}
 				return bestMoves; //Could be no best moves
 			}
@@ -260,7 +261,7 @@ class State {
 
 	@Override
 	public State clone() {
-		State s = new State(this.trick,this.player,this.unseen,this.player_hands[0],this.max_tricks);
+		State s = new State(this.trick,this.player,this.unseen,this.player_hands[0],this.max_tricks, this.player_has_suit);
 		s.player_hands[1] = new LinkedList(this.player_hands[1]);
 		s.player_hands[2] = new LinkedList(this.player_hands[2]);
 		return s;
