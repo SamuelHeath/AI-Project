@@ -20,7 +20,7 @@ public class MONode {
         this.whoMoved = whoIsMoving; // Who picks the action for this node?
         this.visitationCount = 0;
         this.reward = 0;
-        this.availabilityCount = 0;
+        this.availabilityCount = 1; // If instantiated, then available!
         children = new ArrayList<>();
         movesMadeFromHere = new HashSet<>();
     }
@@ -28,10 +28,10 @@ public class MONode {
     public Card getMostVisitedChild() {
         int vis = children.get(0).getVisitationCount();
         Card c = children.get(0).getMoveMade();
-
         for (MONode child : children) {
             if (child.getVisitationCount() > vis) {
                 c = child.getMoveMade();
+                vis = child.getVisitationCount();
             }
         }
         return c;
@@ -88,16 +88,11 @@ public class MONode {
      * @return the selected child node.
      */
     public MONode selectChild(List<Card> validMoves, double exploration) {
-        // TODO null?
-        if (children.size() < 1) {
-            System.out.println("NO CHILD!!!");
-            return null;
-        }
         Set<Card> canDo = new HashSet<>(validMoves);
         int score = Integer.MIN_VALUE;
         MONode child = null;
         for (MONode c : children) {
-            if (canDo.contains(c)) {
+            if (canDo.contains(c.getMoveMade())) {
                 double currScore = calculateScoreOfChild(c, exploration);
                 if (currScore > score) child = c;
                 c.addToAvailabilityCount(1);
@@ -114,7 +109,7 @@ public class MONode {
      * @return the modified UCB1
      */
     private double calculateScoreOfChild(MONode child, double exploration) {
-        double mean = (child.getReward() / child.getVisitationCount());
+        double mean = child.getReward() / child.getVisitationCount();
         double myVisCount = child.getAvailabilityCount();
         double fraction = Math.log(myVisCount) / child.getVisitationCount();
         return mean + (exploration * fraction);
@@ -168,6 +163,7 @@ public class MONode {
     public Card getMoveMade() {
         return this.move;
     }
+
 
 
 }

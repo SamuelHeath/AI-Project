@@ -76,13 +76,13 @@ public class GAImprover {
 		Collections.sort(gameSimulators,new GameComparator());
 		int size = gameSimulators.size();
 		if (size > 10) {
-			for (int i = size; i >= 0 ; i--) {
+			for (int i = size-1; i >= 0 ; i--) {
 				double rep = agentMap.get(gameSimulators.get(i).name);
 				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
 						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
 			}
 		} else {
-			for (int i = size; i >= 0 ; i--) {
+			for (int i = size-1; i >= 0 ; i--) {
 				double rep = agentMap.get(gameSimulators.get(i).name);
 				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
 						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
