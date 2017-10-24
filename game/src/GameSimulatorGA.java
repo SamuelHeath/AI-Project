@@ -22,7 +22,7 @@ public class GameSimulatorGA {
 	public void run() {
 		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
 		Collections.sort(deck, new CardComparator(true));
-		int games = 5;
+		int games = 3;
 		MossSideWhist game = new MossSideWhist(testingAgent, new GreedyAgent(), new GreedyAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();

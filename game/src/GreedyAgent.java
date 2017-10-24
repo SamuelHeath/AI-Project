@@ -34,8 +34,8 @@ public class GreedyAgent implements MSWAgent{
         for (int i = 0; i < 4; i++) {
             ditch[i] = hand.remove(hand.size()-1);
         }
-        System.out.println("PLAYER CARD");
-        for (Card c:hand) System.out.println(c.toString());
+        //System.out.println("PLAYER CARD");
+        //for (Card c:hand) System.out.println(c.toString());
         return ditch;
     }
 

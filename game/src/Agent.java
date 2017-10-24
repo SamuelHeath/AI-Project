@@ -29,7 +29,7 @@ public class Agent implements MSWAgent {
 
 	public Agent() {
 		explore = 1.0/Math.sqrt(2);
-		dep = 6;
+		dep = 4;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
@@ -72,16 +72,16 @@ public class Agent implements MSWAgent {
 		} else { //Ditch the lowest rank non-trump cards.
 			CardComparator cardComparator = new CardComparator(true);
 			Collections.sort(hand, cardComparator);
-			for(Card c : hand) { System.out.print(c); System.out.print(" ");} // DEBUG
+			//for(Card c : hand) { System.out.print(c); System.out.print(" ");} // DEBUG
 			int count = 0;
 			Card[] ditch = new Card[4];
 			// Ditch four cards but keep the spades.
 			int size = hand.size()-1;
 			for (int i = size; i >= 0 && count < 4; i--) {
 				if (!hand.get(i).suit.equals(Suit.SPADES)) {
-					System.out.println("Ditching..."); // DEBUG
+					//System.out.println("Ditching..."); // DEBUG
 					Card d = hand.get(i);
-					System.out.println(d); // DEBUG
+					//System.out.println(d); // DEBUG
 					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
