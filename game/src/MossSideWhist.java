@@ -62,11 +62,9 @@ public class MossSideWhist{
   public void playGame(int rounds, PrintStream report){
     this.report = report;
     for(int i = 0; i<3*rounds; i++){
-      System.out.println("-------------------------------");
       playHand();
       String tmp = leader; leader = left; left = right; right = tmp;
       getScores();
-      System.out.println("-------------------------------");
     }
   }
 
@@ -77,7 +75,8 @@ public class MossSideWhist{
    * until no more cards remain.
    * */
   public void playHand(){
-  report.println("The leader is "+leader+", to the left is "+left+" and "+right+" is to the right.");  
+  //report.println("The leader is "+leader+", to the left is "+left+" and "+right+" is to the " +
+        //"right.");
     deal();
   display(leader); display(left); display(right);  
     Card[] discard = agents.get(leader).discard();
@@ -148,7 +147,7 @@ public class MossSideWhist{
     if(!hand.remove(lead))
       lead = hand.remove(rand.nextInt(hand.size()));
     showCards(lead, first);
-  report.println(lead);
+  //report.println(lead);
   display(second, true);  
     Card next = agents.get(second).playCard();
     hand = hands.get(second);
@@ -156,7 +155,7 @@ public class MossSideWhist{
       next = hand.get(rand.nextInt(hand.size()));
     hand.remove(next);
     showCards(next, second);
-  report.println(next);
+  //report.println(next);
   display(third, true);  
     Card last = agents.get(third).playCard();
     hand = hands.get(third);
@@ -164,12 +163,12 @@ public class MossSideWhist{
       last = hand.get(rand.nextInt(hand.size()));
     hand.remove(last);
     showCards(last, third);
-  report.println(last);  
+  //report.println(last);
     String winner = getWinner(lead, next, last, first, second, third);
     agents.get(leader).seeResult(winner);
     agents.get(left).seeResult(winner);
     agents.get(right).seeResult(winner);
-  report.println(winner+" wins the trick!");
+  //report.println(winner+" wins the trick!");
     return winner;
   }
 
@@ -227,21 +226,21 @@ public class MossSideWhist{
 
   //displays the agents name and score, and if hidden is false, the remaining cards in their hand.
   private void display(String agent, boolean hidden){
-    report.println("Player: "+agent+"\tScore: "+scoreboard.get(agent));
+    //report.println("Player: "+agent+"\tScore: "+scoreboard.get(agent));
     if(!hidden){
       String hand = "";
       for(Card c: hands.get(agent)){
         hand+= c+",";
       }
-      report.println(hand);
+      //report.println(hand);
     }
   }
 
   //shows the scores of all players.
   private void showScores(){
-    report.println(leader+": "+scoreboard.get(leader));
-    report.println(left+": "+scoreboard.get(left));
-    report.println(right+": "+scoreboard.get(right));
+    //report.println(leader+": "+scoreboard.get(leader));
+    //report.println(left+": "+scoreboard.get(left));
+    //report.println(right+": "+scoreboard.get(right));
   }
 
   public static Map<String,Integer> getScores() {

@@ -17,8 +17,8 @@ public class GAImprover {
 	ArrayList<GameSimulatorGA> gameSimulators = new ArrayList();
 
 	public GAImprover() {
-		this.initial_population = 24;
-		this.generations = 10;
+		this.initial_population = 20;
+		this.generations = 50;
 	}
 
 	public GAImprover(int population, int gen, double init_exp_factor, int init_depth) {
@@ -47,7 +47,7 @@ public class GAImprover {
 	}
 
 	public void newInstance() {
-		depth = r.nextInt(14) + 1;
+		depth = r.nextInt(7) + 1; //We dont wanna go too deep
 		int multiplier = r.nextInt(5)+1;
 		double representation = (double)depth*100 + r.nextDouble()*multiplier;
 		System.out.println(representation);
@@ -74,21 +74,33 @@ public class GAImprover {
 
 	public void runGeneticImprovement() {
 		for (int i = 0; i < generations; i ++) {
-			for (GameSimulatorGA game : gameSimulators) {
+			for (GameSimulatorGA game:gameSimulators) {
+				long time = System.currentTimeMillis();
 				game.run();
-				System.out.println("--------------------\nDONE\n------------------------\n");
+				System.out.println("------------------------\nDONE "+" Time Taken: "+ (System.currentTimeMillis()-time) + "\n------------------------\n");
 			}
-			if (i < generations - 1){
-				int children = gameSimulators.size()/3;
-				evaluateFitness();
+
+			int children = gameSimulators.size()/3;
+			evaluateFitness();
+			if (i < generations-1) {
 				crossOver(children);
 				mutate();
 			}
 		}
 		Collections.sort(gameSimulators,new GameComparator());
-		for (int i = 0; i < 10; i++) {
-			double rep = GAMap.get(agentMap.get(gameSimulators.get(i)));
-			System.out.println("Agent 1: " + (int)(rep/100.0) + rep%10.0);
+		int size = gameSimulators.size();
+		if (size > 10) {
+			for (int i = 0; i < 10; i++) {
+				double rep = GAMap.get(agentMap.get(gameSimulators.get(i)));
+				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
+						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				double rep = GAMap.get(agentMap.get(gameSimulators.get(i)));
+				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
+						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
+			}
 		}
 	}
 
@@ -124,7 +136,9 @@ public class GAImprover {
 
 	public static void main(String[] args) {
 		GAImprover gaImprover = new GAImprover();
+		long time = System.currentTimeMillis();
 		gaImprover.initialise();
+		System.out.println("Time Taken: "+ (System.currentTimeMillis()-time));
 	}
 
 }
@@ -133,7 +147,7 @@ class GameComparator implements Comparator<GameSimulatorGA> {
 
 	@Override
 	public int compare(GameSimulatorGA a, GameSimulatorGA b) {
-			return -1*Integer.compare(a.getWins(), b.getWins()); // reverse
+			return Integer.compare(a.getWins(), b.getWins()); // reverse
 	}
 
 }
