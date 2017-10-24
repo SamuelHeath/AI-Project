@@ -11,7 +11,7 @@ public class GameSimulator {
 		Map<String,Integer> gameResult;
 		int games = 5;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
-		MossSideWhist game = new MossSideWhist(new AgentTwo(), new Agent(), new GreedyAgent());
+		MossSideWhist game = new MossSideWhist(new AgentTwo(), new RandomAgent(), new RandomAgent());
 		game.playGame(games, System.out);
 		gameResult =  game.getScores();
 		int i = 0;

@@ -28,10 +28,10 @@ public class MONode {
     public Card getMostVisitedChild() {
         int vis = children.get(0).getVisitationCount();
         Card c = children.get(0).getMoveMade();
-
         for (MONode child : children) {
             if (child.getVisitationCount() > vis) {
                 c = child.getMoveMade();
+                vis = child.getVisitationCount();
             }
         }
         return c;
@@ -88,9 +88,6 @@ public class MONode {
      * @return the selected child node.
      */
     public MONode selectChild(List<Card> validMoves, double exploration) {
-        if (children.isEmpty()) {
-            return null;
-        }
         Set<Card> canDo = new HashSet<>(validMoves);
         int score = Integer.MIN_VALUE;
         MONode child = null;

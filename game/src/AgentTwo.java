@@ -127,10 +127,9 @@ public class AgentTwo implements MSWAgent {
      */
     @Override
     public Card playCard() {
-        // TODO
-        long t = System.currentTimeMillis();
-        Card c = ISMOMCTreeSearch(500);
-        System.out.println((System.currentTimeMillis() - t));
+        long start = System.currentTimeMillis();
+        Card c = ISMOMCTreeSearch(1000);
+        //System.out.println((System.currentTimeMillis() - t));
         return c;
     }
 
@@ -142,8 +141,8 @@ public class AgentTwo implements MSWAgent {
         // To ease my pain, let's store two copies (one at the root)
         MONode[][] playerNodes = new MONode[3][2];
         for (int i = 0; i < playerNodes.length; i++) {
-            playerNodes[i][0] = new MONode(null, null, playerNum);
-            playerNodes[i][1] = playerNodes[i][0];
+            playerNodes[i][0] = new MONode(null, null, playerNum); // root
+            playerNodes[i][1] = playerNodes[i][0]; // leaf
         }
 
         // For n iterations ...
@@ -151,49 +150,11 @@ public class AgentTwo implements MSWAgent {
             // Choose a determinization from our information set.
             MOState state = new MOState(playerNum, firstPlayer,
                     hand, unseen, trick);
-
-            // SELECTION
-            // Terminate when either d is terminal, or the current player
-            // has an untried move.
-            // TODO that condition can probably be optimised.
-            // TODO If there's no cards left to play, then the game has
-            // TODO necessarily probably ended?
-            while (!state.isGameOver() &&
-                    playerNodes[state.getCurrentPlayer()][1].
-                            getUntriedMoves(state.getMoves()).isEmpty()) {
-                // The current player picks an action.
-                MONode n = playerNodes[state.getCurrentPlayer()][1].
-                        selectChild(state.getMoves());
-                Card action = n.getMoveMade();
-                for (int j = 0; j < playerNodes.length; j++) {
-                    // TODO do I really need whoIsMoving?
-                    playerNodes[j][1] = playerNodes[j][1].findOrCreateChild(action,
-                            (state.getCurrentPlayer()+1)%3);
-                }
-                state.move(action);
-            }
-
-            // EXPAND
-            // If we have moves that are untried, then let's try them!
-            List<Card> untried = playerNodes[state.getCurrentPlayer()][1].
-                    getUntriedMoves(state.getMoves());
-            if (!untried.isEmpty()) {
-                // Pick an arbitrary move.
-                Card action = untried.get(rng.nextInt(untried.size()));
-                for (int j = 0; j < playerNodes.length; j++) {
-                    // TODO Do I really need whoIsMoving?
-                    playerNodes[j][1] =
-                            playerNodes[j][1].findOrCreateChild(action,
-                                    (state.getCurrentPlayer()+1)%3);
-                }
-                state.move(action);
-            }
-
-            // SIMULATE by Monte Carlo
+            // select, expand, simulate, backpropagate.
+            select(state, playerNodes);
+            expand(state, playerNodes, rng);
             int worth = simulate(state, rng);
-
-            // BACKPROPAGATE
-            // For each player.
+            // Backpropagate for each node
             for (int j = 0; j < playerNodes.length; j++) {
                 playerNodes[j][1] = backpropagate(playerNodes[j][1], worth);
             }
@@ -202,8 +163,50 @@ public class AgentTwo implements MSWAgent {
         return playerNodes[playerNum][0].getMostVisitedChild();
     }
 
+    /**
+     * Pick a path that seems good.
+     * @param s the game state (immediately after determinisation)
+     * @param playerNodes the player node array
+     */
+    private void select(MOState s, MONode[][] playerNodes) {
+        List<Card> possibleActions = s.getMoves();
+        while (!s.isGameOver() &&
+                playerNodes[s.getCurrentPlayer()][1].
+                        getUntriedMoves(s.getMoves()).isEmpty()) {
+            // The current player picks an action.
+            MONode n = playerNodes[s.getCurrentPlayer()][1].
+                    selectChild(s.getMoves());
+            Card action = n.getMoveMade();
+            // Update every tree.
+            for (int j = 0; j < playerNodes.length; j++) {
+                // TODO do I really need whoIsMoving?
+                playerNodes[j][1] = playerNodes[j][1].findOrCreateChild(action,
+                        (s.getCurrentPlayer() + 1) % 3);
+            }
+            s.move(action);
+            possibleActions = s.getMoves();
+        }
+    }
 
-  /**
+    /**
+     * Select any node that hasn't been tried out yet.
+     * @param s the game state, after selection
+     * @param playerNodes the player node array
+     * @param r a Random object
+     */
+    private void expand(MOState s, MONode[][] playerNodes, Random r) {
+        List<Card> untried = playerNodes[s.getCurrentPlayer()][1].
+                getUntriedMoves(s.getMoves());
+        if (!untried.isEmpty()) {
+            Card act = untried.get(r.nextInt(untried.size()));
+            for (int i = 0; i < playerNodes.length; i++) {
+                playerNodes[i][1] = playerNodes[i][1].findOrCreateChild(act,
+                        (s.getCurrentPlayer()+1)%3);
+            }
+            s.move(act);
+        }
+    }
+    /**
      * A monte-carlo simulation.
      * @param s the current game state
      * @param r for RNG.
@@ -218,6 +221,12 @@ public class AgentTwo implements MSWAgent {
         return s.getScore();
     }
 
+    /**
+     * Back-propagate visitation values etc.
+     * @param leaf the final leaf of the tree in this iteration
+     * @param reward the reward, as observed through simulation
+     * @return the root node
+     */
     private MONode backpropagate(MONode leaf, int reward) {
         MONode curr = leaf;
         while (curr.getParent() != null) {
@@ -227,6 +236,7 @@ public class AgentTwo implements MSWAgent {
         }
         return curr;
     }
+
 
     /**
      * Sees an Agent play a card.
