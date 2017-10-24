@@ -10,15 +10,15 @@ public class GAImprover {
 	private double explorefactor = 1.0/Math.sqrt(2);
 	private int depth = 1;
 	Random r = new Random();
+	Integer count = 0;
 
-	Map<String,Double> GAMap = new HashMap();
-	Map<GameSimulatorGA,String> agentMap = new HashMap();
+	Map<String,Double> agentMap = new HashMap();
 
 	ArrayList<GameSimulatorGA> gameSimulators = new ArrayList();
 
 	public GAImprover() {
-		this.initial_population = 20;
-		this.generations = 50;
+		this.initial_population = 100;
+		this.generations = 450;
 	}
 
 	public GAImprover(int population, int gen, double init_exp_factor, int init_depth) {
@@ -26,16 +26,6 @@ public class GAImprover {
 		this.generations = gen;
 		this.explorefactor = init_exp_factor;
 		this.depth = init_depth;
-	}
-
-	public String generateName() {
-		StringBuilder name = new StringBuilder("");
-		char[] alpha = new char[] {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
-				'q'};
-		for (int j = 0; j < 20; j++) {
-			name.append(alpha[r.nextInt(alpha.length)]);
-		}
-		return name.toString();
 	}
 
 	public void initialise() {
@@ -47,29 +37,25 @@ public class GAImprover {
 	}
 
 	public void newInstance() {
-		depth = r.nextInt(7) + 1; //We dont wanna go too deep
-		int multiplier = r.nextInt(5)+1;
+		depth = r.nextInt(14) + 1; //We dont wanna go too deep
+		int multiplier = r.nextInt(2)+1;
 		double representation = (double)depth*100 + r.nextDouble()*multiplier;
 		System.out.println(representation);
 		System.out.println("Depth: " + (int)(representation/100.0) + " Exploration: " +
 				""+representation%10.0);
-		String name = generateName();
-		GAMap.put(name,representation);
 		Agent a = new Agent();
 		GameSimulatorGA game = new GameSimulatorGA(a);
 		gameSimulators.add(game);
-		agentMap.put(game,name);
+		agentMap.put(game.name,representation);
 	}
 
 	public void makeBabies(double a, double b) {
 		int new_depth = Math.round((float)(((int)(a/100)+(int)(b/100))/2))*100;
 		double representation = new_depth + (double)((a%10.0)+b%10.0)/2.0; //Average components
-		String name = generateName();
-		GAMap.put(name,representation);
 		Agent a1 = new Agent();
 		GameSimulatorGA game = new GameSimulatorGA(a1);
 		gameSimulators.add(game);
-		agentMap.put(game,name);
+		agentMap.put(game.name,representation);
 	}
 
 	public void runGeneticImprovement() {
@@ -80,7 +66,7 @@ public class GAImprover {
 				System.out.println("------------------------\nDONE "+" Time Taken: "+ (System.currentTimeMillis()-time) + "\n------------------------\n");
 			}
 
-			int children = gameSimulators.size()/3;
+			int children = gameSimulators.size()/4;
 			evaluateFitness();
 			if (i < generations-1) {
 				crossOver(children);
@@ -90,14 +76,14 @@ public class GAImprover {
 		Collections.sort(gameSimulators,new GameComparator());
 		int size = gameSimulators.size();
 		if (size > 10) {
-			for (int i = 0; i < 10; i++) {
-				double rep = GAMap.get(agentMap.get(gameSimulators.get(i)));
+			for (int i = size; i >= 0 ; i--) {
+				double rep = agentMap.get(gameSimulators.get(i).name);
 				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
 						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
 			}
 		} else {
-			for (int i = 0; i < size; i++) {
-				double rep = GAMap.get(agentMap.get(gameSimulators.get(i)));
+			for (int i = size; i >= 0 ; i--) {
+				double rep = agentMap.get(gameSimulators.get(i).name);
 				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
 						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
 			}
@@ -106,16 +92,15 @@ public class GAImprover {
 
 	public void evaluateFitness() {
 		Collections.sort(gameSimulators, new GameComparator());
-		int remove_num = gameSimulators.size()/3; // remove 1 third percent of population
-		for (int j = 0; j < remove_num; j++) gameSimulators.remove(gameSimulators.size()-1); // Remove worst
+		int remove_num = gameSimulators.size()/4; // remove 1 quarter percent of population
+		for (int j = 0; j < remove_num; j++) gameSimulators.remove(0); // Remove worst
 	}
 
 	public void crossOver(int num_children) {
 		int size = gameSimulators.size();
 		//Combine best two all the way down.
 		for (int i = 0; i < num_children*2; i+=2) {
-			makeBabies(GAMap.get(agentMap.get(gameSimulators.get(i))),GAMap.get(agentMap.get
-					(gameSimulators.get(i+1))));
+			makeBabies(agentMap.get(gameSimulators.get(i).name),agentMap.get(gameSimulators.get(i+1).name));
 		}
 	}
 
@@ -123,13 +108,14 @@ public class GAImprover {
 		int randSize = r.nextInt(gameSimulators.size()/2); // Random number of atleast half population affected
 		for (int i = 0; i < randSize; i++) {
 			int k = r.nextInt(randSize);
-			double rep = GAMap.get(agentMap.get(gameSimulators.get(k)));
+			double rep = agentMap.get(gameSimulators.get(k).name);
 			int pos_neg = r.nextInt(1);
 			if (pos_neg == 0) pos_neg = -1;
-			double variate = (double)(pos_neg)*r.nextDouble()/8.0;
+			double variate = (double)(pos_neg)*r.nextDouble()/10.0; //max 0.1 change this is meant to
+			// fine tune it
 			int depth = (int)rep/100;
 			double exp_factor = rep%10.0 + variate;
-			GAMap.put(agentMap.get(gameSimulators.get(k)),(double)depth+exp_factor);
+			agentMap.put(gameSimulators.get(k).name,(double)depth+exp_factor);
 			System.out.println("Mutated: " + rep+ " To " + ((double)depth + exp_factor));
 		}
 	}

@@ -37,18 +37,27 @@ class State {
 	 * Info game.
 	 */
 	public void determinise(boolean[][] suitAvail) {
-		List<Card> cards = unseen;
+		List<Card> cards = this.unseen;
 		//Build-up decks based on information we have gained!
-
-		//Randomly assign the remaining cards
-		Random rand = new Random();
-		Collections.shuffle(unseen);
 
 		List<Card> cardsForBoth = new LinkedList();
 
-		int size;
-		if (Agent.lead) size = cards.size();
-		else size = cards.size()-4; //We havent seen which cards were thrown away
+
+
+		int size = cards.size();
+		if (!Agent.lead && size <= 36 && size >= 32) { // You aren't the leader
+			Collections.sort(cards, new CardComparator(true));
+			for (int i = 0; i < 4; i++) {
+				Card c = cards.remove(0);
+				this.unseen.remove(c);
+			}
+			size = cards.size(); //We havent seen which cards were thrown away but we can assume
+		}
+
+		//Randomly assign the remaining cards
+		Random rand = new Random();
+		Collections.shuffle(this.unseen);
+
 		for (int i = 0; i < size; i++) {
 			if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
 				cardsForBoth.add(cards.get(i));
@@ -130,7 +139,7 @@ class State {
 			//printScores();
 			this.trick.clear();
 			//System.out.println();
-			this.num_tricks++;
+			this.num_tricks++; //update current depth.
 		} else {
 			setPlayerNext();
 		}

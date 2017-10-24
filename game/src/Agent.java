@@ -28,8 +28,9 @@ public class Agent implements MSWAgent {
 	}
 
 	public Agent() {
-		explore = 1.0/Math.sqrt(2);
-		dep = 4;
+		explore = 0.8398887663975074; //GA obtained
+		//explore = 1.0/Math.sqrt(2);
+		dep = 3;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
@@ -77,11 +78,11 @@ public class Agent implements MSWAgent {
 			Card[] ditch = new Card[4];
 			// Ditch four cards but keep the spades.
 			int size = hand.size()-1;
-			for (int i = size; i >= 0 && count < 4; i--) {
+			for (int i = 0; i < size && count < 4; i++) {
 				if (!hand.get(i).suit.equals(Suit.SPADES)) {
 					//System.out.println("Ditching..."); // DEBUG
 					Card d = hand.get(i);
-					//System.out.println(d); // DEBUG
+					System.out.println(d); // DEBUG
 					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
@@ -110,7 +111,7 @@ public class Agent implements MSWAgent {
 
 		Random rand = new Random();
 		int x = 0;
-		while (System.currentTimeMillis()-startTime < playTime) {
+		while (System.currentTimeMillis()-startTime < playTime && x < 750) {
 			//Information Set Monte Carlo Tree Search updating curr_node as we go.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
@@ -139,13 +140,8 @@ public class Agent implements MSWAgent {
 				for (Card c:winningMoves) System.out.print(c.toString()+" ");
 				System.out.println();*/
 
-				if (winningMoves.size() > 0) {
-					action = winningMoves.get(rand.nextInt(winningMoves.size())); //Choose from best
-				} else {
-					Collections.sort(actions_to_expand, new CardComparator(true));
-					action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning cards so
-					// choose randomly
-				}
+
+				action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning cards so
 				curr_node = curr_node.addChild(action, state.player);
 				state.performAction(action);
 			}
@@ -153,11 +149,12 @@ public class Agent implements MSWAgent {
 			//System.out.println("Play Off\n-------------");
 			while (state.availableActions().size() > 0 && curr_state.canGoDeepa()) {
 				//Apply heuristic here
-				List<Card> winning_moves = state.getWinningCards();
+				//List<Card> winning_moves = state.getWinningCards();
 				//From the moves which will get us a win choose the lowest, if no cards allow us a win play best card
-				if (winning_moves.size() != 0) state.performAction(winning_moves.get(rand.nextInt
-						(winning_moves.size())));
-				else state.performAction(state.getMove());
+				/*if (winning_moves.size() != 0) state.performAction(winning_moves.get(rand.nextInt
+						(winning_moves.size())));*/
+				state.performAction(state.availableActions().get(rand.nextInt(state.availableActions().size()
+				)));
 			}
 			//System.out.println("-------------");
 

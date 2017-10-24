@@ -65,7 +65,7 @@ public class Node {
 	 */
 	public double ISUCT() {
 		//Depending on time add heuristic (h(i)) which helps choose nodes via h(i)/num_visits.
-		return ((double) num_wins /(double) num_visits) + EXP_FACTOR*Math.sqrt(Math.log((double)parent
+		return ((double) num_wins /(double) num_visits) + Agent.explore*Math.sqrt(Math.log((double)parent
 				.num_visits)/(double) num_visits);
 	}
 
