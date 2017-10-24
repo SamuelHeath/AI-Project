@@ -88,13 +88,20 @@ public class MONode {
      * @return the selected child node.
      */
     public MONode selectChild(List<Card> validMoves, double exploration) {
-        if (children.size() < 1) return null;
-        MONode child = children.get(0);
-        double score = calculateScoreOfChild(child, exploration);
+        // TODO null?
+        if (children.size() < 1) {
+            System.out.println("NO CHILD!!!");
+            return null;
+        }
+        Set<Card> canDo = new HashSet<>(validMoves);
+        int score = Integer.MIN_VALUE;
+        MONode child = null;
         for (MONode c : children) {
-            double currScore = calculateScoreOfChild(c, exploration);
-            if (currScore > score) child = c;
-            c.addToAvailabilityCount(1);
+            if (canDo.contains(c)) {
+                double currScore = calculateScoreOfChild(c, exploration);
+                if (currScore > score) child = c;
+                c.addToAvailabilityCount(1);
+            }
         }
         // TODO
         return child;
