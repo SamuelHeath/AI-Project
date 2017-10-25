@@ -13,9 +13,9 @@ public class GameSimulator {
 		int games = 3;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
-        MSWAgent a = new AgentTwo();
-        MSWAgent b = new RandomAgent();
-        MSWAgent c = new RandomAgent();
+        MSWAgent a = new Agent();
+        MSWAgent b = new GreedyAgent();
+        MSWAgent c = new GreedyNaive();
 
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
         for (int i = 0; i < 100; i++) {
