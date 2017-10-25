@@ -22,6 +22,7 @@ public class AgentTwo implements MSWAgent {
     private String playerToLeft;
     private Map<String, Integer> players;
     private int firstPlayer;
+    private int numberRemoved;
 
     /**
      * Tells the agent the names of the competing agents, and their relative position.
@@ -52,6 +53,7 @@ public class AgentTwo implements MSWAgent {
         this.seen = new HashSet<>(hand);
         this.unseen = new HashSet<>(DECK);
         unseen.removeAll(seen);
+        numberRemoved = 0;
 
         // Reset isValidSuit with the new order
         isValidSuit = instantiateValidSuits(playerNum);
@@ -128,7 +130,7 @@ public class AgentTwo implements MSWAgent {
     @Override
     public Card playCard() {
         long start = System.currentTimeMillis();
-        Card c = ISMOMCTreeSearch(1000, false);
+        Card c = ISMOMCTreeSearch(190, true);
         //System.out.println((System.currentTimeMillis() - start));
         return c;
     }
@@ -156,7 +158,7 @@ public class AgentTwo implements MSWAgent {
             long start = System.currentTimeMillis();
             while (System.currentTimeMillis() - start < iterations) {
                 MOState state = new MOState(playerNum, firstPlayer, hand,
-                        unseen, trick, isValidSuit);
+                        unseen, trick, isValidSuit, numberRemoved);
                 treeSearchIteration(state, playerNodes, rng);
             }
         }
@@ -164,7 +166,7 @@ public class AgentTwo implements MSWAgent {
             // For n iterations ...
             for (int i = 0; i < iterations; i++) {
                 MOState state = new MOState(playerNum, firstPlayer,
-                        hand, unseen, trick, isValidSuit);
+                        hand, unseen, trick, isValidSuit, numberRemoved);
                 treeSearchIteration(state, playerNodes, rng);
             }
         }
@@ -268,6 +270,7 @@ public class AgentTwo implements MSWAgent {
         // TODO
         trick[players.get(agent)] = card;
         moveUnseenToSeen(card);
+        //System.out.println(agent + " played " + card);
         // If my card, then remove it from my hand.
         if (agent == this.NAME) {
             hand.remove(card);
@@ -276,21 +279,23 @@ public class AgentTwo implements MSWAgent {
             // oh-ho-ho! This card doesn't follow suit.
             int pnum = players.get(agent);
             if (pnum != playerNum) {
-                isValidSuit.get(pnum).put(card.suit, false);
-            }
-            // CHECK: if both players don't have a particular suit
-            // then let's remove those suits from unseen.
-            for (Suit s : Suit.values()) {
+                isValidSuit.get(pnum).put(trick[firstPlayer].suit, false);
+                //System.out.println(pnum + " doesn't have " + trick[firstPlayer].suit);
+                // CHECK: if both opponents don't have a particular suit
+                // then let's remove those suits from unseen.
                 for (int k : isValidSuit.keySet()) {
                     if (k == pnum) continue;
-                    if (!isValidSuit.get(k).get(s) &&
-                            !isValidSuit.get(pnum).get(s)) {
+                    if (!isValidSuit.get(k).get(trick[firstPlayer].suit) &&
+                            !isValidSuit.get(pnum).get(trick[firstPlayer].suit)) {
                         // Remove all such suits from unseen.
                         // This lets us know what was discarded.
-                        System.out.println("REMOVING " + s);
+                        List<Card> toBeRemoved = new ArrayList<>(16);
                         for (Card c : unseen) {
-                            if (c.suit == s) unseen.remove(c);
+                            if (c.suit == trick[firstPlayer].suit) toBeRemoved.add(c);
                         }
+                        //System.out.println(toBeRemoved.size() + " cards removed");
+                        numberRemoved += toBeRemoved.size();
+                        unseen.removeAll(toBeRemoved);
                     }
                 }
             }

@@ -14,7 +14,7 @@ public class GameSimulator {
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
         MSWAgent a = new AgentTwo();
-        MSWAgent b = new GreedyAgent();
+        MSWAgent b = new GreedyNaive();
         MSWAgent c = new GreedyAgent();
 
         playGameManyTimes(150, games, a,b,c);

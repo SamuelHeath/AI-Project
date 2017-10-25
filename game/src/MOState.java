@@ -15,10 +15,11 @@ public class MOState {
     private boolean gameOver;
     private int firstPlayer;
     private Map<Integer, EnumMap<Suit, Boolean>> isValidSuit;
+    private int numberRemoved;
 
     public MOState(int playerNum, int firstPlayer,
                    Set<Card> myHand, Set<Card> unseen, Card[] trick,
-                   Map<Integer, EnumMap<Suit, Boolean>> isValidSuit) {
+                   Map<Integer, EnumMap<Suit, Boolean>> isValidSuit, int numberRemoved) {
         this.unseen = new ArrayList<>(52);
         this.unseen.addAll(unseen);
         this.tricksWon = new int[3];
@@ -27,13 +28,13 @@ public class MOState {
         this.player = playerNum;
         this.hands = new HashMap<>(3);
         this.isValidSuit = isValidSuit;
+        this.numberRemoved = numberRemoved;
         for (int i = 0; i < 3; i++) {
             this.hands.put(i, new HashSet<>());
         }
         this.hands.put(playerNum, new HashSet<>(myHand));
         this.firstPlayer = firstPlayer;
         randomizeCards();
-
         this.currTrick = trick.clone();
     }
 
@@ -46,42 +47,123 @@ public class MOState {
         // If I'm the leader, then I know that the set of unseen cards
         // is the set of cards allocated to the opponents.
         // Otherwise, account for discards.
-        int numberRemainingInUnseen = player == 0 ? 0 : 4;
-        // Begin allocating from the third player to play this round
-        int pnum = roundModulus(firstPlayer - 1, 3);
+        int numberRemainingInUnseen = player == 0 ? 0 : 4 - numberRemoved;
+
+        // Random, arbitrary allocation that doesn't consider
+        // our current knowledge.
+        //int pnum = roundModulus(firstPlayer - 1, 3);
+        int pnum = firstPlayer;
         while (unseen.size() > numberRemainingInUnseen) {
-            // We already know our cards!
+            pnum = roundModulus(pnum - 1, 3);
+            // Skip me - I have my cards!
             if (pnum == this.player) {
                 pnum = roundModulus(pnum - 1, 3);
-                continue;
             }
-            // Get a card and check if this opponent is allowed this card.
-            Card c;
-            int nxtIndex;
-            do {
-                nxtIndex = r.nextInt(unseen.size());
-                c = unseen.get(nxtIndex);
-                System.out.println("STUCK");
-            } while (!isValidSuit.get(pnum).get(c.suit));
-            hands.get(pnum).add(c);
-            unseen.remove(nxtIndex);
-            pnum = roundModulus(pnum - 1, 3);
+            hands.get(pnum).add(unseen.remove(r.nextInt(unseen.size())));
         }
-        /*
-        for (int c = 0; c < size; c++) {
-            // Start allocating at the last player, because they go last in a round
-            // so they might be allowed an extra card.
-            // TODO In allocation, we should also consider what suits are valid.
-            if (pnum == this.player) {
-                c--; // de-allocate
-                pnum = roundModulus(pnum-1, 3);
-                continue;
-            }
-            hands.get(pnum).add(unseen.get(c));
-            pnum = roundModulus(pnum-1,3);
+        // Iterative repair - we should 'fix up' any cards
+        // that shouldn't exist in a particular opponent's hand.
+        // see: n-queens problem (kind of?)
+        // pnum is one opponent; we need to figure out other opponent's number
+        int other = pnum != 0 && this.player != 0 ? 0 :
+                pnum != 1 && this.player != 1 ? 1 : 2;
+        //System.out.println(isValidSuit.get(other));
+        //System.out.println(isValidSuit.get(pnum));
+        long start = System.currentTimeMillis();
+
+        // A map of owners to their hands.
+        List<Collection<Card>> allCards = new ArrayList<>();
+        allCards.add(hands.get(pnum));
+        allCards.add(hands.get(other));
+        allCards.add(unseen);
+        while (!checkHandValidity(isValidSuit.get(pnum), hands.get(pnum)) ||
+                !checkHandValidity(isValidSuit.get(other), hands.get(other))) {
+            List<Card> pnumInvalids =
+                    getInvalidCards(hands.get(pnum), isValidSuit.get(pnum));
+            List<Card> otherInvalids =
+                    getInvalidCards(hands.get(other), isValidSuit.get(other));
+
+            findCardsToSwapWith(allCards, hands.get(pnum),
+                    getInvalidCards(hands.get(pnum), isValidSuit.get(pnum)),
+                    isValidSuit.get(pnum));
+            findCardsToSwapWith(allCards, hands.get(other),
+                    getInvalidCards(hands.get(other), isValidSuit.get(other)),
+                    isValidSuit.get(other));
         }
-        */
     }
+
+    private void findCardsToSwapWith(List<Collection<Card>> all,
+                                    Set<Card> hand, List<Card> remove, EnumMap<Suit, Boolean> validSuit) {
+        for (Card c : remove) {
+            boolean foundCandidate = false;
+            // Search through allCards
+            // to see if there's something I can swap with
+            for (Collection<Card> col : all) {
+                if (col == hand) { // don't swap with self
+                    continue;
+                }
+                // Generate a new 'view'
+                List<Card> currList = new ArrayList<>(col);
+                for (Card candidate : currList) {
+                    if (validSuit.get(candidate.suit)) {
+                        // swap
+                        foundCandidate = true;
+                        col.remove(candidate);
+                        hand.add(candidate);
+                        hand.remove(c);
+                        col.add(c);
+                        break;
+                    }
+                }
+                if (foundCandidate) break;
+            }
+        }
+    }
+
+
+   private boolean checkHandValidity(EnumMap<Suit, Boolean> validSuits, Set<Card> hand) {
+        for (Card c : hand) {
+            if (!validSuits.get(c.suit)) return false;
+        }
+        return true;
+   }
+
+   private List<Card> getInvalidCards(Set<Card> hand, EnumMap<Suit, Boolean> validSuits) {
+        List<Card> l = new ArrayList<>(hand.size());
+        for (Card c : hand) {
+            if (!validSuits.get(c.suit)) l.add(c);
+        }
+        return l;
+   }
+    /**
+     * Return the first card found that is invalid
+     * else any arbitrary card.
+     * @param validSuits the valid suits for this player
+     * @param otherSuits the valid suits for the other player
+     *                   this param just helps guide choice of a card to swap
+     * @param hand the player's current hand
+     * @return
+     */
+   private Card getBadCard(EnumMap<Suit, Boolean> validSuits, EnumMap<Suit, Boolean> otherSuits,
+                           Set<Card> hand) {
+       // Get the first card that shouldn't be in this hand.
+       for (Card c : hand) {
+           if (!validSuits.get(c.suit)) {
+               return c;
+           }
+       }
+       // No such card? Try to get one that is allowed in the other hand
+       for (Card c : hand) {
+           if (otherSuits.get(c.suit)) return c;
+       }
+       // Otherwise, just return any card
+       // If we get up to this point, it's a bit concerning...
+       Random rand = new Random();
+       List<Card> handlist = new ArrayList<>(hand);
+       //System.out.println(handlist);
+       //System.out.println(validSuits + "\t" + otherSuits);
+       return handlist.get(rand.nextInt(handlist.size()));
+   }
 
     /**
      * Negative numbers don't wrap back. This makes it wrap back.
@@ -206,6 +288,10 @@ public class MOState {
     public List<Card> getHand(int i) {
         return new ArrayList<>(hands.get(i));
     }
+
+
+    public static void main(String[] args) {
+   }
 }
 
 class MyCardComparator implements Comparator<Card> {
