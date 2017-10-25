@@ -51,7 +51,6 @@ public class MOState {
 
         // Random, arbitrary allocation that doesn't consider
         // our current knowledge.
-        //int pnum = roundModulus(firstPlayer - 1, 3);
         int pnum = firstPlayer;
         while (unseen.size() > numberRemainingInUnseen) {
             pnum = roundModulus(pnum - 1, 3);
@@ -67,22 +66,14 @@ public class MOState {
         // pnum is one opponent; we need to figure out other opponent's number
         int other = pnum != 0 && this.player != 0 ? 0 :
                 pnum != 1 && this.player != 1 ? 1 : 2;
-        //System.out.println(isValidSuit.get(other));
-        //System.out.println(isValidSuit.get(pnum));
-        long start = System.currentTimeMillis();
 
-        // A map of owners to their hands.
+        // All cards that can be used to swap
         List<Collection<Card>> allCards = new ArrayList<>();
         allCards.add(hands.get(pnum));
         allCards.add(hands.get(other));
         allCards.add(unseen);
         while (!checkHandValidity(isValidSuit.get(pnum), hands.get(pnum)) ||
                 !checkHandValidity(isValidSuit.get(other), hands.get(other))) {
-            List<Card> pnumInvalids =
-                    getInvalidCards(hands.get(pnum), isValidSuit.get(pnum));
-            List<Card> otherInvalids =
-                    getInvalidCards(hands.get(other), isValidSuit.get(other));
-
             findCardsToSwapWith(allCards, hands.get(pnum),
                     getInvalidCards(hands.get(pnum), isValidSuit.get(pnum)),
                     isValidSuit.get(pnum));

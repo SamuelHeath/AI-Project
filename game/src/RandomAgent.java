@@ -8,6 +8,7 @@ public class RandomAgent implements MSWAgent{
 
   private List<Card> hand;
   private Random rand = new Random();
+  private String name = "RandomAgent" + (char)('a' + rand.nextInt(26));
 
   /**
    * Tells the agent the names of the competing agents, and their relative position.
@@ -80,7 +81,6 @@ public class RandomAgent implements MSWAgent{
    * This method will only be called once.
    * */
   public String sayName(){
-    String name= "RandomAgent" + (char)('A'+rand.nextInt(26));
     return name;
   }
 

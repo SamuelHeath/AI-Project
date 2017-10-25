@@ -130,7 +130,7 @@ public class AgentTwo implements MSWAgent {
     @Override
     public Card playCard() {
         long start = System.currentTimeMillis();
-        Card c = ISMOMCTreeSearch(190, true);
+        Card c = ISMOMCTreeSearch(1000, false);
         //System.out.println((System.currentTimeMillis() - start));
         return c;
     }
