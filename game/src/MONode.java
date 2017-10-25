@@ -10,14 +10,14 @@ public class MONode {
     private List<MONode> children;
     private int visitationCount; // why won't my grandchildren visit me?
     private int availabilityCount;
-    private double reward;
+    private int reward;
     private Card move;
     private int whoMoved;
     private Set<Card> movesMadeFromHere;
-    public MONode(MONode parent, Card move, int whoIsMoving) {
+    public MONode(MONode parent, Card move, int whoMadeActionToHere) {
         this.p = parent;
         this.move = move; // What move got us to this node?
-        this.whoMoved = whoIsMoving; // Who picks the action for this node?
+        this.whoMoved = whoMadeActionToHere; // Who picks the action for this node?
         this.visitationCount = 0;
         this.reward = 0;
         this.availabilityCount = 1; // If instantiated, then available!
@@ -35,6 +35,10 @@ public class MONode {
             }
         }
         return c;
+    }
+
+    public List<MONode> getChildren() {
+        return children;
     }
 
     /**
@@ -58,13 +62,17 @@ public class MONode {
 
     /**
      * @param c a card action of this node
-     * @param whoIsMoving who moves at this node?
+     * @param whoIsMoving who moved to this node?
      */
     public MONode addChild(Card c, int whoIsMoving) {
         MONode child = new MONode(this, c, whoIsMoving);
         children.add(child);
         movesMadeFromHere.add(c);
         return child;
+    }
+
+    public int getWhoMoved() {
+        return this.whoMoved;
     }
 
     /**
@@ -111,7 +119,7 @@ public class MONode {
     private double calculateScoreOfChild(MONode child, double exploration) {
         double mean = child.getReward() / child.getVisitationCount();
         double myVisCount = child.getAvailabilityCount();
-        double fraction = Math.log(myVisCount) / child.getVisitationCount();
+        double fraction = Math.sqrt(Math.log(myVisCount) / child.getVisitationCount());
         return mean + (exploration * fraction);
     }
 
@@ -140,7 +148,7 @@ public class MONode {
         this.availabilityCount += n;
     }
 
-    public void setReward(double n) {
+    public void setReward(int n) {
         this.reward = n;
     }
 
@@ -148,7 +156,7 @@ public class MONode {
         return this.reward;
     }
 
-    public void addToReward(double n) {
+    public void addToReward(int n) {
         this.reward += n;
     }
 

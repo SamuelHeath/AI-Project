@@ -2,10 +2,10 @@ import java.util.*;
 
 public class GreedyAgent implements MSWAgent{
 
-    private String agent_name = "Greedy Agent";
     public List<Card> hand;
     public List<Card> trick;
     private Random random = new Random();
+    private String agent_name = "Greedy Agent"+random.nextInt(1000);
 
     /**
      * Tells the agent the names of the competing agents, and their relative position.
@@ -50,7 +50,17 @@ public class GreedyAgent implements MSWAgent{
         }
         if (!hasLeadSuit) {
             moves.clear();
-            moves.addAll(this.hand);
+            // Check again; do we have any spades?
+            boolean spades = false;
+            for (Card c : this.hand) {
+                if (c.suit == Suit.SPADES) {
+                    spades = true;
+                    moves.add(c);
+                }
+            }
+            if (!spades) {
+                moves.addAll(this.hand);
+            }
         }
         return moves;
     }
@@ -99,7 +109,7 @@ public class GreedyAgent implements MSWAgent{
     }
 
     public String sayName() {
-        return this.agent_name + random.nextInt(1000);
+        return this.agent_name;
     }
 
 }

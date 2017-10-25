@@ -28,10 +28,10 @@ public class GameSimulator {
 		//System.out.println(game.numDraw);
 		for (String s:gameResult.keySet()) {
 			//System.out.printf("Agent: %s won %d \n", s, gameResult.get(s));
-            //System.out.printf("%s, %d, %d\n", s, gameResult.get(s), nGames);
+            System.out.printf("%s, %d, %d\n", s, gameResult.get(s), nGames);
 		}
 		//System.out.println("--------");
-        System.out.println(getWinner(gameResult));
+        System.out.println(getWinner(gameResult) + " won\n");
     }
 
     private static void playGameManyTimes(int numberOfSimulations, int nGames,

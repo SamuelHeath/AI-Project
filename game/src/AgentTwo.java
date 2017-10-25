@@ -128,40 +128,60 @@ public class AgentTwo implements MSWAgent {
     @Override
     public Card playCard() {
         long start = System.currentTimeMillis();
-        Card c = ISMOMCTreeSearch(1000);
-        //System.out.println((System.currentTimeMillis() - t));
+        Card c = ISMOMCTreeSearch(1000, false);
+        //System.out.println((System.currentTimeMillis() - start));
         return c;
     }
 
-    private Card ISMOMCTreeSearch(int iterations) {
+    /**
+     * If time is true, then do up to 'iterations' wall-time milliseconds of search.
+     * Otherwise, do that many iterations of search.
+     * @param iterations
+     * @param time
+     * @return A card to play next
+     */
+    private Card ISMOMCTreeSearch(int iterations, boolean time) {
         // TODO
         // For each player, create a single node tree that is
         // representative of our information set.
         Random rng = new Random();
-        // To ease my pain, let's store two copies (one at the root)
+        // To ease my pain, let's store two copies; one represents the root
         MONode[][] playerNodes = new MONode[3][2];
         for (int i = 0; i < playerNodes.length; i++) {
-            playerNodes[i][0] = new MONode(null, null, playerNum); // root
+            playerNodes[i][0] = new MONode(null, null, -1); // root
             playerNodes[i][1] = playerNodes[i][0]; // leaf
         }
 
-        // For n iterations ...
-        for (int i = 0; i < iterations; i++) {
-            // Choose a determinization from our information set.
-            MOState state = new MOState(playerNum, firstPlayer,
-                    hand, unseen, trick);
-            // select, expand, simulate, backpropagate.
-            select(state, playerNodes);
-            expand(state, playerNodes, rng);
-            int worth = simulate(state, rng);
-            // Backpropagate for each node
-            for (int j = 0; j < playerNodes.length; j++) {
-                playerNodes[j][1] = backpropagate(playerNodes[j][1], worth);
+        if (time) { // if we use time to figure out when to return
+            long start = System.currentTimeMillis();
+            while (System.currentTimeMillis() - start < iterations) {
+                MOState state = new MOState(playerNum, firstPlayer, hand,
+                        unseen, trick, isValidSuit);
+                treeSearchIteration(state, playerNodes, rng);
             }
         }
+        else {
+            // For n iterations ...
+            for (int i = 0; i < iterations; i++) {
+                MOState state = new MOState(playerNum, firstPlayer,
+                        hand, unseen, trick, isValidSuit);
+                treeSearchIteration(state, playerNodes, rng);
+            }
+        }
+
         // Finally, return the action that has been explored the most.
         return playerNodes[playerNum][0].getMostVisitedChild();
     }
+
+    private void treeSearchIteration(MOState s, MONode[][] playerNodes, Random r) {
+        select(s, playerNodes);
+        expand(s, playerNodes, r);
+        int[] worth = simulate(s, r);
+        for (int j = 0; j < playerNodes.length; j++) {
+            playerNodes[j][1] = backpropagate(playerNodes[j][1], worth);
+        }
+    }
+
 
     /**
      * Pick a path that seems good.
@@ -169,22 +189,19 @@ public class AgentTwo implements MSWAgent {
      * @param playerNodes the player node array
      */
     private void select(MOState s, MONode[][] playerNodes) {
-        List<Card> possibleActions = s.getMoves();
         while (!s.isGameOver() &&
                 playerNodes[s.getCurrentPlayer()][1].
                         getUntriedMoves(s.getMoves()).isEmpty()) {
-            // The current player picks an action.
+            // The current player picks an action from possible moves using UCB1
             MONode n = playerNodes[s.getCurrentPlayer()][1].
                     selectChild(s.getMoves());
             Card action = n.getMoveMade();
             // Update every tree.
             for (int j = 0; j < playerNodes.length; j++) {
-                // TODO do I really need whoIsMoving?
                 playerNodes[j][1] = playerNodes[j][1].findOrCreateChild(action,
-                        (s.getCurrentPlayer() + 1) % 3);
+                        s.getCurrentPlayer());
             }
-            s.move(action);
-            possibleActions = s.getMoves();
+            s.move(action); // update the determinisation with this action
         }
     }
 
@@ -201,7 +218,7 @@ public class AgentTwo implements MSWAgent {
             Card act = untried.get(r.nextInt(untried.size()));
             for (int i = 0; i < playerNodes.length; i++) {
                 playerNodes[i][1] = playerNodes[i][1].findOrCreateChild(act,
-                        (s.getCurrentPlayer()+1)%3);
+                        s.getCurrentPlayer());
             }
             s.move(act);
         }
@@ -212,7 +229,7 @@ public class AgentTwo implements MSWAgent {
      * @param r for RNG.
      * @return the utility of a terminal state
      */
-    private int simulate(MOState s, Random r) {
+    private int[] simulate(MOState s, Random r) {
         while (!s.isGameOver()) {
             List<Card> possAct = s.getMoves();
             Card act = possAct.get(r.nextInt(possAct.size()));
@@ -224,14 +241,16 @@ public class AgentTwo implements MSWAgent {
     /**
      * Back-propagate visitation values etc.
      * @param leaf the final leaf of the tree in this iteration
-     * @param reward the reward, as observed through simulation
+     * @param rewards the rewards for each player
+     *                as observed through simulation
      * @return the root node
      */
-    private MONode backpropagate(MONode leaf, int reward) {
+    private MONode backpropagate(MONode leaf, int[] rewards) {
         MONode curr = leaf;
         while (curr.getParent() != null) {
             curr.addToVisitCount(1);
-            curr.addToReward(reward);
+            curr.addToReward(rewards[curr.getWhoMoved()]);
+            // node availability updated during creation of node - easier
             curr = curr.getParent();
         }
         return curr;
@@ -254,11 +273,27 @@ public class AgentTwo implements MSWAgent {
             hand.remove(card);
         }
         if (card.suit != trick[firstPlayer].suit) {
-           // oh-ho-ho! This card doesn't follow suit.
-           int pnum = players.get(agent);
-           if (pnum != playerNum) {
-               isValidSuit.get(pnum).put(card.suit, false);
-           }
+            // oh-ho-ho! This card doesn't follow suit.
+            int pnum = players.get(agent);
+            if (pnum != playerNum) {
+                isValidSuit.get(pnum).put(card.suit, false);
+            }
+            // CHECK: if both players don't have a particular suit
+            // then let's remove those suits from unseen.
+            for (Suit s : Suit.values()) {
+                for (int k : isValidSuit.keySet()) {
+                    if (k == pnum) continue;
+                    if (!isValidSuit.get(k).get(s) &&
+                            !isValidSuit.get(pnum).get(s)) {
+                        // Remove all such suits from unseen.
+                        // This lets us know what was discarded.
+                        System.out.println("REMOVING " + s);
+                        for (Card c : unseen) {
+                            if (c.suit == s) unseen.remove(c);
+                        }
+                    }
+                }
+            }
         }
     }
 

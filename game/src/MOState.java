@@ -14,9 +14,11 @@ public class MOState {
     private final Suit TRUMP = Suit.SPADES;
     private boolean gameOver;
     private int firstPlayer;
+    private Map<Integer, EnumMap<Suit, Boolean>> isValidSuit;
 
     public MOState(int playerNum, int firstPlayer,
-                   Set<Card> myHand, Set<Card> unseen, Card[] trick) {
+                   Set<Card> myHand, Set<Card> unseen, Card[] trick,
+                   Map<Integer, EnumMap<Suit, Boolean>> isValidSuit) {
         this.unseen = new ArrayList<>(52);
         this.unseen.addAll(unseen);
         this.tricksWon = new int[3];
@@ -24,14 +26,16 @@ public class MOState {
         this.nextPlayer = playerNum; // If this gets created, I've been asked to play.
         this.player = playerNum;
         this.hands = new HashMap<>(3);
+        this.isValidSuit = isValidSuit;
         for (int i = 0; i < 3; i++) {
             this.hands.put(i, new HashSet<>());
         }
         this.hands.put(playerNum, new HashSet<>(myHand));
         this.firstPlayer = firstPlayer;
         randomizeCards();
+
         this.currTrick = trick.clone();
-   }
+    }
 
     /**
      * Randomly allocate cards to the other hands.
@@ -43,14 +47,25 @@ public class MOState {
         // is the set of cards allocated to the opponents.
         // Otherwise, account for discards.
         int numberRemainingInUnseen = player == 0 ? 0 : 4;
+        // Begin allocating from the third player to play this round
         int pnum = roundModulus(firstPlayer - 1, 3);
         while (unseen.size() > numberRemainingInUnseen) {
+            // We already know our cards!
             if (pnum == this.player) {
-                pnum = roundModulus(pnum-1, 3);
+                pnum = roundModulus(pnum - 1, 3);
                 continue;
             }
-            hands.get(pnum).add(unseen.remove(r.nextInt(unseen.size())));
-            pnum = roundModulus(pnum-1,3);
+            // Get a card and check if this opponent is allowed this card.
+            Card c;
+            int nxtIndex;
+            do {
+                nxtIndex = r.nextInt(unseen.size());
+                c = unseen.get(nxtIndex);
+                System.out.println("STUCK");
+            } while (!isValidSuit.get(pnum).get(c.suit));
+            hands.get(pnum).add(c);
+            unseen.remove(nxtIndex);
+            pnum = roundModulus(pnum - 1, 3);
         }
         /*
         for (int c = 0; c < size; c++) {
@@ -70,21 +85,23 @@ public class MOState {
 
     /**
      * Negative numbers don't wrap back. This makes it wrap back.
+     *
      * @param n
      */
     private int roundModulus(int n, int wrap) {
-        return ((n%wrap)+wrap)%wrap;
+        return ((n % wrap) + wrap) % wrap;
     }
 
     /**
-     * @return The score of playerNum.
+     * @return The scores.
      */
-    public int getScore() {
-        return tricksWon[player];
+    public int[] getScore() {
+        return tricksWon.clone();
     }
 
     /**
      * The current player makes a move.
+     *
      * @param c the card they play
      */
     public void move(Card c) {
@@ -107,7 +124,7 @@ public class MOState {
                 tricksWon[1] = tricksWon[1] - 4;
                 tricksWon[2] = tricksWon[2] - 4;
             }
-       }
+        }
     }
 
     public boolean isGameOver() {
@@ -116,6 +133,7 @@ public class MOState {
 
     /**
      * Get the winner of a trick
+     *
      * @param t, an array of played cards where the indices are player number.
      * @return the index of the winning card
      */
@@ -134,9 +152,9 @@ public class MOState {
     private void setNextPlayer(int n) {
         this.nextPlayer = n;
     }
-    private void incrementToNextPlayer()
-    {
-        this.nextPlayer = (this.nextPlayer + 1)%3;
+
+    private void incrementToNextPlayer() {
+        this.nextPlayer = (this.nextPlayer + 1) % 3;
     }
 
     public int getCurrentPlayer() {
@@ -150,6 +168,7 @@ public class MOState {
      * Cards of the same suit as the first card
      * If no such card exists, then spades, if any exists
      * Else, empty list.
+     *
      * @return all valid moves from the current player.
      */
     public List<Card> getMoves() {
@@ -170,8 +189,7 @@ public class MOState {
         for (Card c : currPlayerHand) {
             if (c.suit == validSuit) {
                 sameSuit.add(c);
-            }
-            else if (c.suit == TRUMP) {
+            } else if (c.suit == TRUMP) {
                 spades.add(c);
             }
         }
