@@ -17,7 +17,7 @@ public class GAImprover {
 	ArrayList<GameSimulatorGA> gameSimulators = new ArrayList();
 
 	public GAImprover() {
-		this.initial_population = 20;
+		this.initial_population = 15;
 		this.generations = 30;
 	}
 

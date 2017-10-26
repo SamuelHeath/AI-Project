@@ -25,8 +25,8 @@ public class GameSimulatorGA {
 		Collections.sort(deck, new CardComparator(true));
 
 		int games = 3;
-		MossSideWhist game = new MossSideWhist(testingAgent, new GreedyNaive("GR33D by abraram"),
-				new GreedyNaive("GR33D by abraram1"));
+		MossSideWhist game = new MossSideWhist(testingAgent, new Agent("Sam"),
+				new Agent("Sam1"));
 		game.playGame(games, System.out);
 
 		gameResult = game.getScores();
