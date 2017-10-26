@@ -24,9 +24,6 @@ public class AgentTwo implements MSWAgent {
     private int firstPlayer;
     private int numberRemoved;
 
-    // REMOVE
-    private double explore;
-
     /**
      * Tells the agent the names of the competing agents, and their relative position.
      */
@@ -39,10 +36,6 @@ public class AgentTwo implements MSWAgent {
         players.put(agentLeft, 0);
         players.put(agentRight, 0);
         players.put(NAME, 0);
-   }
-
-   public AgentTwo(double exp) {
-        this.explore = exp;
    }
 
     /**
@@ -136,7 +129,7 @@ public class AgentTwo implements MSWAgent {
      */
     @Override
     public Card playCard() {
-        Card c = ISMOMCTreeSearch(1000, false);
+        Card c = ISMOMCTreeSearch(195, true);
         return c;
     }
 
@@ -200,7 +193,7 @@ public class AgentTwo implements MSWAgent {
                         getUntriedMoves(s.getMoves()).isEmpty()) {
             // The current player picks an action from possible moves using UCB1
             MONode n = playerNodes[s.getCurrentPlayer()][1].
-                    selectChild(s.getMoves(), explore);
+                    selectChild(s.getMoves(), 0.5);
             Card action = n.getMoveMade();
             // Update every tree.
             for (int j = 0; j < playerNodes.length; j++) {

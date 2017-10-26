@@ -29,9 +29,10 @@ public class Agent implements MSWAgent {
 
 	public Agent() {
 		//explore = 4.3432901157198955;
-		explore = 3.884345602601573; //GA obtained
-		//explore = 1.0/Math.sqrt(2);
-		dep = 0;
+		//explore = 3.884345602601573; //GA obtained
+		explore = 1.0/Math.sqrt(2);
+		dep = 6;
+		//dep = 0;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
