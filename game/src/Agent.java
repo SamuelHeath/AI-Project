@@ -28,9 +28,10 @@ public class Agent implements MSWAgent {
 	}
 
 	public Agent() {
-		explore = 0.8398887663975074; //GA obtained
+		//explore = 4.3432901157198955;
+		explore = 3.884345602601573; //GA obtained
 		//explore = 1.0/Math.sqrt(2);
-		dep = 3;
+		dep = 0;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
@@ -82,7 +83,7 @@ public class Agent implements MSWAgent {
 				if (!hand.get(i).suit.equals(Suit.SPADES)) {
 					//System.out.println("Ditching..."); // DEBUG
 					Card d = hand.get(i);
-					System.out.println(d); // DEBUG
+					//System.out.println(d); // DEBUG
 					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
@@ -111,7 +112,7 @@ public class Agent implements MSWAgent {
 
 		Random rand = new Random();
 		int x = 0;
-		while (System.currentTimeMillis()-startTime < playTime && x < 750) {
+		while (System.currentTimeMillis()-startTime < playTime && x < 1000) {
 			//Information Set Monte Carlo Tree Search updating curr_node as we go.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
