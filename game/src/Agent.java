@@ -32,7 +32,6 @@ public class Agent implements MSWAgent {
 		explore = 1.683864981087254;
 		//explore = 3.884345602601573; //GA obtained
 		//explore = 1.0/Math.sqrt(2);
-
 		dep = 9;
 	}
 
