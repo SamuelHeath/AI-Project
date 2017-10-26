@@ -12,7 +12,7 @@ def plot(agentName, *args):
         v = np.genfromtxt(filename, names=True, delimiter=',', autostrip=True)
         nGames   = sum(v[0]) # number of games per row
         win_rate = np.average(v[agentName])/nGames
-        stan_err = stats.sem(v[agentName])/nGames
+        stan_err = stats.sem(v[agentName]/nGames)
         ax.bar(ind, win_rate, yerr=stan_err, capsize=5)
         #ax.set_xticks(ind+0.4) # centre
         ind += 1
