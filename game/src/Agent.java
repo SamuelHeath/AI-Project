@@ -113,7 +113,7 @@ public class Agent implements MSWAgent {
 
 		Random rand = new Random();
 		int x = 0;
-		while (System.currentTimeMillis()-startTime < playTime && x < 1500) {
+		while (System.currentTimeMillis()-startTime < playTime) {
 			//Information Set Monte Carlo Tree Search updating curr_node as we go.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
