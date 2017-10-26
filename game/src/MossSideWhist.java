@@ -3,8 +3,8 @@ import java.io.*;
 
 public class MossSideWhist{
 
-  public static Map<String, Integer> final_score = new HashMap();  //a map from names to scores
-  public static int numDraw = 0;
+  public Map<String, Integer> final_score = new HashMap();  //a map from names to scores
+  public int numDraw = 0;
 
   public static String leader; //the name of the first player
   static String left; //the name of the second player
@@ -243,7 +243,7 @@ public class MossSideWhist{
     //report.println(right+": "+scoreboard.get(right));
   }
 
-  public static Map<String,Integer> getScores() {
+  public Map<String,Integer> getScores() {
     int lead = scoreboard.get(leader)-8;
     int lft = scoreboard.get(left)-4;
     int rgt = scoreboard.get(right)-4;

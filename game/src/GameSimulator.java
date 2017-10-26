@@ -10,12 +10,12 @@ public class GameSimulator {
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
 
-		int rounds = 3;
+		int rounds = 1;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
         MSWAgent a = new Agent("Carlos");
-        MSWAgent b = new GreedyAgent();
-        MSWAgent c = new GreedyNaive();
+        MSWAgent b = new GreedyNaive("Ab");
+        MSWAgent c = new GreedyNaive("Abrar");
 
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
         for (int i = 0; i < 100; i++) {

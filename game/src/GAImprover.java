@@ -12,13 +12,13 @@ public class GAImprover {
 	Random r = new Random();
 	Integer count = 0;
 
-	Map<String,Double> agentMap = new HashMap();
+	Map<Integer,Double> agentMap = new HashMap();
 
 	ArrayList<GameSimulatorGA> gameSimulators = new ArrayList();
 
 	public GAImprover() {
-		this.initial_population = 10;
-		this.generations = 25;
+		this.initial_population = 20;
+		this.generations = 30;
 	}
 
 	public GAImprover(int population, int gen, double init_exp_factor, int init_depth) {
@@ -37,26 +37,26 @@ public class GAImprover {
 	}
 
 	public void newInstance() {
-		depth = r.nextInt(14) + 1;
-		int multiplier = r.nextInt(4)+1;
+		depth = r.nextInt(15) + 1;
+		int multiplier = r.nextInt(8)+1;
 		double representation = (double)depth*100 + r.nextDouble()*multiplier;
 		System.out.println(representation);
-		System.out.println("Depth: " + (int)(representation/100.0) + " Exploration: " +
+		System.out.println("Depth: " + (int)Math.floor(representation/100.0) + " Exploration: " +
 				""+representation%10.0);
 		Agent a = new Agent("Carlo Monty");
-		GameSimulatorGA game = new GameSimulatorGA(a);
+		GameSimulatorGA game = new GameSimulatorGA(a,++count);
 		gameSimulators.add(game);
-		agentMap.put(game.name,representation);
+		agentMap.put(count,representation);
 	}
 
 	public void makeBabies(double a, double b) {
-		int new_depth = Math.round((float)(((a/100.0)+(b/100.0))/2.0))*100;
+		int new_depth = Math.round((float)((Math.floor(a/100.0)+Math.floor(b/100.0))/2.0))*100;
 		double representation = Math.round(new_depth) + ((a%10.0)+(b%10.0))/2.0; //Average
 		// components
 		Agent a1 = new Agent("Carlo Monty");
-		GameSimulatorGA game = new GameSimulatorGA(a1);
+		GameSimulatorGA game = new GameSimulatorGA(a1,++count);
 		gameSimulators.add(game);
-		agentMap.put(game.name,representation);
+		agentMap.put(count,representation);
 	}
 
 	public void runGeneticImprovement() {
@@ -86,7 +86,7 @@ public class GAImprover {
 			for (int i = size-1; i >= 0 ; i--) {
 				double rep = agentMap.get(gameSimulators.get(i).name);
 				System.out.println("Agent "+i+": Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
-						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
+						10.0 + " \tNum Wins: " + gameSimulators.get(i).getWins());
 			}
 		}
 	}
@@ -114,10 +114,10 @@ public class GAImprover {
 			if (pos_neg == 0) pos_neg = -1;
 			double variate = (double)(pos_neg)*r.nextDouble()/10.0; //max 0.1 change this is meant to
 			// fine tune it
-			int depth = (int)rep/100;
+			int depth = (int)Math.floor(rep/100.0);
 			double exp_factor = rep%10.0 + variate;
-			agentMap.put(gameSimulators.get(k).name,(double)depth+exp_factor);
-			System.out.println("Mutated: " + rep+ " To " + ((double)depth + exp_factor));
+			agentMap.put(gameSimulators.get(k).name,((double)depth*100.0)+exp_factor);
+			System.out.println("Mutated: " + rep+ " To " + ((double)depth*100.0 + exp_factor));
 		}
 	}
 

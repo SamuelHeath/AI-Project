@@ -29,10 +29,11 @@ public class Agent implements MSWAgent {
 
 	public Agent(String name) {
 		this.name = name;
-		//explore = 4.3432901157198955;
+		explore = 1.683864981087254;
 		//explore = 3.884345602601573; //GA obtained
-		explore = 1.0/Math.sqrt(2);
-		dep = 16;
+		//explore = 1.0/Math.sqrt(2);
+
+		dep = 9;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
@@ -47,8 +48,10 @@ public class Agent implements MSWAgent {
 		SUITMAP.put(Suit.SPADES,3);
 		num_wins = new int[] {0,0,0};
 		ArrayList<Card> deck = new ArrayList<>(Arrays.asList(Card.values()));
-		Collections.sort(deck); // Can't Remember why I did this
-		for (Card c : deck) unSeen.add(c);
+		Collections.sort(deck,new CardComparator(true)); // Can't Remember why I did this
+		for (Card c : deck) {
+			unSeen.add(c);
+		}
 		hand = new LinkedList();
 		trick = new LinkedList();
 		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
@@ -75,16 +78,13 @@ public class Agent implements MSWAgent {
 		} else { //Ditch the lowest rank non-trump cards.
 			CardComparator cardComparator = new CardComparator(true);
 			Collections.sort(hand, cardComparator);
-			//for(Card c : hand) { System.out.print(c); System.out.print(" ");} // DEBUG
 			int count = 0;
 			Card[] ditch = new Card[4];
 			// Ditch four cards but keep the spades.
 			int size = hand.size()-1;
 			for (int i = 0; i < size && count < 4; i++) {
 				if (!hand.get(i).suit.equals(Suit.SPADES)) {
-					//System.out.println("Ditching..."); // DEBUG
 					Card d = hand.get(i);
-					//System.out.println(d); // DEBUG
 					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
@@ -104,62 +104,86 @@ public class Agent implements MSWAgent {
 		long playTime = 180; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
-		State curr_state = new State(trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0 represents THIS player
+		State curr_state = new State(this.trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0
+		// represents THIS player
 
-		/*System.out.println("Trick Size: " + trick.size());
-		System.out.print("My Cards: ");
-		for (Card c:hand) System.out.print(c.toString()+ " ");
-		System.out.println();*/
+		/*if (trick.size() > 0) {
+			System.out.print("Trick: ");
+			for (Card c:trick) System.out.print(c.toString()+" ");
+			System.out.println();
+		}*/
 
 		Random rand = new Random();
 		int x = 0;
-		while (System.currentTimeMillis()-startTime < playTime && x < 1500) {
-			//Information Set Monte Carlo Tree Search updating curr_node as we go.
+		while (System.currentTimeMillis()-startTime < playTime && x < 600) {
+			//Information Set Monte Carlo Tree Search updating curr_node and state.
 			State state = curr_state.clone(); // Copies the state
-			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
+			state.determinise(playerHasSuit);// Initially determinise, as this AI doesn't know what others have.
 
-			/*System.out.print("Available cards: ");
-			for (Card c:state.availableActions()) System.out.print(c.toString() + " ");
+			/*System.out.print("Determinisation: ");
+			for (int i = 0; i < 2; i++) {
+				for (Card c: state.player_hands[i+1]) {
+					System.out.print(c.toString() + " ");
+				}
+				System.out.print(" | ");
+			}
+			System.out.println();
+
+			List<Card> wins = state.getWinningCards();
+			List<Card> moves = state.availableActions();
+			System.out.print("Moves Available: ");
+			for (Card c:moves) {
+				System.out.print(c.toString()+" ");
+			}
+			if (state.trick.size()>0) {
+				System.out.print("Has suit: "+state.playerHasSuit(0,state.trick.get(0).suit));
+			}
+			System.out.print("\nWinning Moves: ");
+			for (Card c:wins) {
+				System.out.print(c.toString()+" ");
+			}
 			System.out.println();*/
 
+			//Select Stage
 			while (curr_node.unexploredActions(state.availableActions()).size() == 0 &&
 					state.availableActions().size() != 0) {
-
 				curr_node = curr_node.selectChild(state.availableActions());
 				state.performAction(curr_node.action);
 			}
 
+			//Expand Stage
 			List<Card> actions_to_expand = curr_node.unexploredActions(state.availableActions());
 			if (actions_to_expand.size() > 0) {
 				//Apply a heuristic to select a better card
 				Card action;
-				List<Card> winningMoves = state.getWinningCards(actions_to_expand);
-				/*System.out.print("Trick: ");
-				for (Card c:this.trick) System.out.print(c.toString()+" ");
-				System.out.print(" My Cards: ");
-				for (Card c:hand) System.out.print(c.toString()+ " ");
-				System.out.print(" Selecting Best Cards: ");
-				for (Card c:winningMoves) System.out.print(c.toString()+" ");
-				System.out.println();*/
 
-
-				action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning cards so
+				List<Card> winningMoves = state.getWinningCards(actions_to_expand); //Expand nodes we can win
+				if (winningMoves.size() > 0) {
+					Collections.sort(winningMoves,new CardComparator(true));
+					action = winningMoves.get(rand.nextInt(winningMoves.size()));
+				} else action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning
+				// cards
 				curr_node = curr_node.addChild(action, state.player);
 				state.performAction(action);
+				//System.out.println("Expansion: "+action);
 			}
 
-			//System.out.println("Play Off\n-------------");
+			//Play-Off Stage
 			while (state.availableActions().size() > 0 && curr_state.canGoDeepa()) {
 				//Apply heuristic here
-				//List<Card> winning_moves = state.getWinningCards();
-				//From the moves which will get us a win choose the lowest, if no cards allow us a win play best card
-				/*if (winning_moves.size() != 0) state.performAction(winning_moves.get(rand.nextInt
-						(winning_moves.size())));*/
-				state.performAction(state.availableActions().get(rand.nextInt(state.availableActions().size()
-				)));
+				List<Card> winning_moves = state.getWinningCards();
+				//Sort by lowest spade
+				Collections.sort(winning_moves,new CardComparator(false,true));
+				//From the moves which will get us a win choose the lowest, if no cards allow us a win
+				//play best card
+				if (winning_moves.size() != 0) {
+					state.performAction(winning_moves.get(rand.nextInt(winning_moves.size())));
+				} else {
+					state.performAction(state.availableActions().get(rand.nextInt(state.availableActions().size())));
+				}
 			}
-			//System.out.println("-------------");
 
+			//Backtrack Stage
 			while (curr_node != null) {
 				curr_node.updateNode(state);
 				if (curr_node.parent != null) curr_node = curr_node.parent;
@@ -168,11 +192,12 @@ public class Agent implements MSWAgent {
 			x++;
 		}
 
-		/*System.out.println("Num Nodes Fully Explored "+x);
-		System.out.println("Time: "+(startTime-System.currentTimeMillis()));
+		//System.out.println("Num Nodes Fully Explored "+x);
+		//System.out.println("Time: "+(System.currentTimeMillis()-startTime));
 		Collections.sort(curr_node.children,new NodeComparator());
-		System.out.print("Children: ");
-		for (Node n:curr_node.children) System.out.print(n.action.toString() + " ");
+		/*System.out.print("Children: ");
+		for (Node n:curr_node.children) System.out.print("Action: " + n.action+ " Value "+ n.ISUCT() +
+				" ");
 		System.out.println();*/
 		Card c = curr_node.children.get(curr_node.children.size()-1).action;
 		//System.out.println("Playing: " + c.toString());
