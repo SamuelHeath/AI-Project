@@ -50,7 +50,7 @@ public class GameSimulator {
         }
 	    	System.out.println(wins.get(a.sayName()) + ",\t" +
 					wins.get(b.sayName()) + ",\t" +
-					wins.get(c.sayName()) + ",\t" + exp);
+					wins.get(c.sayName()) + ",\t");
     }
 
     private static String getWinner(Map<String, Integer> scores) {
