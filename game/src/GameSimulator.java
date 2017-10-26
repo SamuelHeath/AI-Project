@@ -10,13 +10,16 @@ public class GameSimulator {
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
 
-		int rounds = 3;
+		int rounds = 5;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
         MSWAgent a = new Agent("Carlos");
         MSWAgent b = new GreedyAgent();
-        MSWAgent c = new GreedyNaive();
+        MSWAgent c = new GreedyAgent();
 
+		System.out.println("Number of sims: " + 100);
+		System.out.println("Number of games per sim: " + 10);
+		System.out.println("Number of rounds per game: " + 5);
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
         for (int i = 0; i < 100; i++) {
         	playGameManyTimes(10, rounds, a,b,c,0.0);
@@ -29,11 +32,6 @@ public class GameSimulator {
 		game.playGame(nGames, System.out);
 		gameResult =  game.getScores();
 		//System.out.println(game.numDraw);
-		for (String s:gameResult.keySet()) {
-//            System.out.printf("%s, %d, %d\n", s, gameResult.get(s), nGames);
-		}
-		//System.out.println("--------");
-        //System.out.println(getWinner(gameResult) + " won\n");
 		return getWinner(gameResult);
     }
 
@@ -43,7 +41,6 @@ public class GameSimulator {
 		wins.put(a.sayName(), 0);
 		wins.put(b.sayName(), 0);
 		wins.put(c.sayName(), 0);
-//		System.out.println(a.sayName() + ",\t\t" + b.sayName() + ",\t\t" + c.sayName());
 	    for (int i = 0; i < numberOfSimulations; i++) {
 	        String w = playGame(nGames, a, b, c);
 	        wins.put(w, wins.get(w) + 1);

@@ -32,7 +32,7 @@ public class Agent implements MSWAgent {
 		//explore = 4.3432901157198955;
 		//explore = 3.884345602601573; //GA obtained
 		explore = 1.0/Math.sqrt(2);
-		dep = 16;
+		dep = 6;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
