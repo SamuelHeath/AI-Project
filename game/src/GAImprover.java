@@ -17,8 +17,8 @@ public class GAImprover {
 	ArrayList<GameSimulatorGA> gameSimulators = new ArrayList();
 
 	public GAImprover() {
-		this.initial_population = 20;
-		this.generations = 40;
+		this.initial_population = 10;
+		this.generations = 25;
 	}
 
 	public GAImprover(int population, int gen, double init_exp_factor, int init_depth) {
@@ -37,22 +37,23 @@ public class GAImprover {
 	}
 
 	public void newInstance() {
-		depth = r.nextInt(14) + 1; //We dont wanna go too deep
-		int multiplier = r.nextInt(2)+1;
+		depth = r.nextInt(14) + 1;
+		int multiplier = r.nextInt(4)+1;
 		double representation = (double)depth*100 + r.nextDouble()*multiplier;
 		System.out.println(representation);
 		System.out.println("Depth: " + (int)(representation/100.0) + " Exploration: " +
 				""+representation%10.0);
-		Agent a = new Agent();
+		Agent a = new Agent("Carlo Monty");
 		GameSimulatorGA game = new GameSimulatorGA(a);
 		gameSimulators.add(game);
 		agentMap.put(game.name,representation);
 	}
 
 	public void makeBabies(double a, double b) {
-		int new_depth = Math.round((float)(((int)(a/100)+(int)(b/100))/2))*100;
-		double representation = new_depth + (double)((a%10.0)+b%10.0)/2.0; //Average components
-		Agent a1 = new Agent();
+		int new_depth = Math.round((float)(((a/100.0)+(b/100.0))/2.0))*100;
+		double representation = Math.round(new_depth) + ((a%10.0)+(b%10.0))/2.0; //Average
+		// components
+		Agent a1 = new Agent("Carlo Monty");
 		GameSimulatorGA game = new GameSimulatorGA(a1);
 		gameSimulators.add(game);
 		agentMap.put(game.name,representation);
@@ -78,13 +79,13 @@ public class GAImprover {
 		if (size > 10) {
 			for (int i = size-1; i >= 0 ; i--) {
 				double rep = agentMap.get(gameSimulators.get(i).name);
-				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
+				System.out.println("Agent "+i+": Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
 						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
 			}
 		} else {
 			for (int i = size-1; i >= 0 ; i--) {
 				double rep = agentMap.get(gameSimulators.get(i).name);
-				System.out.println("Agent 1: Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
+				System.out.println("Agent "+i+": Depth: " + (int) (rep / 100.0) + " Exploration "  + rep %
 						10.0 + " Num Wins: " + gameSimulators.get(i).getWins());
 			}
 		}

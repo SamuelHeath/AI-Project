@@ -27,12 +27,12 @@ public class Agent implements MSWAgent {
 		dep = depth;
 	}
 
-	public Agent() {
+	public Agent(String name) {
+		this.name = name;
 		//explore = 4.3432901157198955;
 		//explore = 3.884345602601573; //GA obtained
 		explore = 1.0/Math.sqrt(2);
-		dep = 6;
-		//dep = 0;
+		dep = 16;
 	}
 
 	public void setup(String agentLeft, String agentRight) {
@@ -113,7 +113,7 @@ public class Agent implements MSWAgent {
 
 		Random rand = new Random();
 		int x = 0;
-		while (System.currentTimeMillis()-startTime < playTime && x < 1000) {
+		while (System.currentTimeMillis()-startTime < playTime && x < 1500) {
 			//Information Set Monte Carlo Tree Search updating curr_node as we go.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesnt know what others have.
