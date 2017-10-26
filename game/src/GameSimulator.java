@@ -13,13 +13,13 @@ public class GameSimulator {
 		int rounds = 3;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
-        MSWAgent a = new Agent();
+        MSWAgent a = new Agent("Carlos");
         MSWAgent b = new GreedyAgent();
         MSWAgent c = new GreedyNaive();
 
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
         for (int i = 0; i < 100; i++) {
-        	playGameManyTimes(10, games, a,b,c);
+        	playGameManyTimes(10, rounds, a,b,c,0.0);
 		}
 }
 
