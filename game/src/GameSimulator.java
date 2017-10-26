@@ -10,18 +10,25 @@ public class GameSimulator {
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
 
-		int games = 3;
+		int rounds = 3;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
-        MSWAgent a = new AgentTwo();
         MSWAgent b = new RandomAgent();
-        MSWAgent c = new RandomAgent();
-
-		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
-        for (int i = 0; i < 100; i++) {
-        	playGameManyTimes(10, games, a,b,c);
+		MSWAgent c = new RandomAgent();
+        int NUMBEROFSIMS = 50;
+        int NUMBEROFGAMES = 10;
+        System.out.println("Number of simulations: " + NUMBEROFSIMS);
+        System.out.println("Number of games: " + NUMBEROFGAMES);
+        System.out.println("Number of rounds per game: " + rounds);
+		for (double exp = 0.25; exp < 2.50; exp += 0.25) {
+			MSWAgent a = new AgentTwo(exp);
+		// 100 simulations; each simulation has 10 games (and each game has 3 rounds).
+			System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName() + ",\texploration");
+			for (int i = 0; i < NUMBEROFSIMS; i++) {
+				playGameManyTimes(NUMBEROFGAMES, rounds, a, b, c, exp);
+			}
 		}
-	}
+}
 
 	private static String playGame(int nGames, MSWAgent a, MSWAgent b, MSWAgent c) {
 	    Map<String, Integer> gameResult;
@@ -38,7 +45,7 @@ public class GameSimulator {
     }
 
     private static void playGameManyTimes(int numberOfSimulations, int nGames,
-                                          MSWAgent a, MSWAgent b, MSWAgent c) {
+                                          MSWAgent a, MSWAgent b, MSWAgent c, double exp) {
 		Map<String, Integer> wins = new HashMap<>();
 		wins.put(a.sayName(), 0);
 		wins.put(b.sayName(), 0);
@@ -50,7 +57,7 @@ public class GameSimulator {
         }
 	    	System.out.println(wins.get(a.sayName()) + ",\t" +
 					wins.get(b.sayName()) + ",\t" +
-					wins.get(c.sayName()));
+					wins.get(c.sayName()) + ",\t" + exp);
     }
 
     private static String getWinner(Map<String, Integer> scores) {

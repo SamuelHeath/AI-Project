@@ -6,7 +6,7 @@ import java.util.*;
  */
 public class MOState {
     private List<Card> unseen;
-    Map<Integer, Set<Card>> hands;
+    private Map<Integer, Set<Card>> hands;
     private int player;
     private int nextPlayer;
     private Card[] currTrick;

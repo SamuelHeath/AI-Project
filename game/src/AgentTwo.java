@@ -24,6 +24,9 @@ public class AgentTwo implements MSWAgent {
     private int firstPlayer;
     private int numberRemoved;
 
+    // REMOVE
+    private double explore;
+
     /**
      * Tells the agent the names of the competing agents, and their relative position.
      */
@@ -36,6 +39,10 @@ public class AgentTwo implements MSWAgent {
         players.put(agentLeft, 0);
         players.put(agentRight, 0);
         players.put(NAME, 0);
+   }
+
+   public AgentTwo(double exp) {
+        this.explore = exp;
    }
 
     /**
@@ -129,21 +136,18 @@ public class AgentTwo implements MSWAgent {
      */
     @Override
     public Card playCard() {
-        long start = System.currentTimeMillis();
         Card c = ISMOMCTreeSearch(1000, false);
-        //System.out.println((System.currentTimeMillis() - start));
         return c;
     }
 
     /**
      * If time is true, then do up to 'iterations' wall-time milliseconds of search.
      * Otherwise, do that many iterations of search.
-     * @param iterations
-     * @param time
+     * @param iterations number of iterations (or milliseconds)
+     * @param time whether or not walltime should be used to terminate
      * @return A card to play next
      */
     private Card ISMOMCTreeSearch(int iterations, boolean time) {
-        // TODO
         // For each player, create a single node tree that is
         // representative of our information set.
         Random rng = new Random();
@@ -196,7 +200,7 @@ public class AgentTwo implements MSWAgent {
                         getUntriedMoves(s.getMoves()).isEmpty()) {
             // The current player picks an action from possible moves using UCB1
             MONode n = playerNodes[s.getCurrentPlayer()][1].
-                    selectChild(s.getMoves());
+                    selectChild(s.getMoves(), explore);
             Card action = n.getMoveMade();
             // Update every tree.
             for (int j = 0; j < playerNodes.length; j++) {
@@ -267,7 +271,6 @@ public class AgentTwo implements MSWAgent {
      */
     @Override
     public void seeCard(Card card, String agent) {
-        // TODO
         trick[players.get(agent)] = card;
         moveUnseenToSeen(card);
         //System.out.println(agent + " played " + card);
@@ -310,7 +313,6 @@ public class AgentTwo implements MSWAgent {
      */
     @Override
     public void seeResult(String winner) {
-        // TODO
         // Reset the tricks.
         currMoveInTrick = 0;
         trick = new Card[3];
@@ -325,7 +327,6 @@ public class AgentTwo implements MSWAgent {
     @Override
     public void seeScore(Map<String, Integer> scoreboard) {
         this.sboard = scoreboard;
-        // TODO
     }
 
     /**
