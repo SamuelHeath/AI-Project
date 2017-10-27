@@ -1,15 +1,21 @@
-import sun.management.resources.agent;
-
 import java.util.*;
 
 /**
+ * SO-ISMCTS
  * @author Sam Heath (21725083)
  * @author Andre Wang (21714084)
  */
 public class Agent21725083 implements MSWAgent {
 
-	public static double explore;
-	private int dep; //number of tricks to look ahead by
+/* Genetic Algorithm Values
+	explore = 1.683864981087254;
+	//explore = 3.884345602601573; //GA obtained
+	//explore = 1.0/Math.sqrt(2);
+	depth = 9;
+*/
+
+	public static double explore = 1.683864981087254;
+	private int depth = 9; //number of tricks to look ahead by
 
 	private int[] num_wins;
 	private String name = "Carlo Monty";
@@ -24,23 +30,6 @@ public class Agent21725083 implements MSWAgent {
 	List<Card> trick;
 	int trick_count = 1;
 
-	int[] trickToIteration = new int[16];
-
-/*
-	public Agent(double exploration, int depth) {
-		explore = exploration;
-		dep = depth;
-	}
-
-	public Agent(String name) {
-		this.name = name;
-		explore = 1.683864981087254;
-		//explore = 3.884345602601573; //GA obtained
-		//explore = 1.0/Math.sqrt(2);
-		dep = 9;
-	}
-
-*/
 	public void setup(String agentLeft, String agentRight) {
 		AGENTMAP = new HashMap();
 		AGENTMAP.put(this.name,0);
@@ -53,7 +42,6 @@ public class Agent21725083 implements MSWAgent {
 		SUITMAP.put(Suit.SPADES,3);
 		num_wins = new int[] {0,0,0};
 		ArrayList<Card> deck = new ArrayList<>(Arrays.asList(Card.values()));
-		Collections.sort(deck,new CardComparator(true)); // Can't Remember why I did this
 		for (Card c : deck) {
 			unSeen.add(c);
 		}
@@ -94,8 +82,8 @@ public class Agent21725083 implements MSWAgent {
 					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
-			for (Card c:ditch) hand.remove(c);
 			// update our hand
+			for (Card c:ditch) hand.remove(c);
 			return ditch;
 		}
 	}
@@ -107,49 +95,19 @@ public class Agent21725083 implements MSWAgent {
      * @return the Card they wish to play.
      */
 	public Card playCard() {
-		long playTime = 190; // give 200ms to explore and respond.
+		long playTime = 185; // give 185ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
-		State curr_state = new State(this.trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0
+		State curr_state = new State(this.trick,0,this.unSeen,this.hand, depth,playerHasSuit); //0
 		// represents THIS player
-
-		/*if (trick.size() > 0) {
-			System.out.print("Trick: ");
-			for (Card c:trick) System.out.print(c.toString()+" ");
-			System.out.println();
-		}*/
 
 		Random rand = new Random();
 		int x = 0;
-		//System.out.println("Expansion: "+(int)(177.79*Math.exp(0.2995*trick_count)));
+		//System.out.println("Expansion: "+(int)(223*Math.exp(0.3005*trick_count)));
 		while (System.currentTimeMillis()-startTime < playTime) {
 			//Information Set Monte Carlo Tree Search updating curr_node and state.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesn't know what others have.
-
-			/*System.out.print("Determinisation: ");
-			for (int i = 0; i < 2; i++) {
-				for (Card c: state.player_hands[i+1]) {
-					System.out.print(c.toString() + " ");
-				}
-				System.out.print(" | ");
-			}
-			System.out.println();
-
-			List<Card> wins = state.getWinningCards();
-			List<Card> moves = state.availableActions();
-			System.out.print("Moves Available: ");
-			for (Card c:moves) {
-				System.out.print(c.toString()+" ");
-			}
-			if (state.trick.size()>0) {
-				System.out.print("Has suit: "+state.playerHasSuit(0,state.trick.get(0).suit));
-			}
-			System.out.print("\nWinning Moves: ");
-			for (Card c:wins) {
-				System.out.print(c.toString()+" ");
-			}
-			System.out.println();*/
 
 			//Select Stage
 			while (curr_node.unexploredActions(state.availableActions()).size() == 0 &&
@@ -168,11 +126,9 @@ public class Agent21725083 implements MSWAgent {
 				if (winningMoves.size() > 0) {
 					Collections.sort(winningMoves,new CardComparator(true));
 					action = winningMoves.get(rand.nextInt(winningMoves.size()));
-				} else action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning
-				// cards
+				} else action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning cards
 				curr_node = curr_node.addChild(action, state.player);
 				state.performAction(action);
-				//System.out.println("Expansion: "+action);
 			}
 
 			//Play-Off Stage
@@ -181,8 +137,7 @@ public class Agent21725083 implements MSWAgent {
 				List<Card> winning_moves = state.getWinningCards();
 				//Sort by lowest spade
 				Collections.sort(winning_moves,new CardComparator(false,true));
-				//From the moves which will get us a win choose the lowest, if no cards allow us a win
-				//play best card
+				//From the moves which will get us a win choose the lowest, if no cards allow us a win play best card
 				if (winning_moves.size() != 0) {
 					state.performAction(winning_moves.get(rand.nextInt(winning_moves.size())));
 				} else {
@@ -198,17 +153,8 @@ public class Agent21725083 implements MSWAgent {
 			}
 			x++;
 		}
-
-		//System.out.println(x);
-		trickToIteration[trick_count%16] += x;
-		//System.out.println("Time: "+(System.currentTimeMillis()-startTime));
 		Collections.sort(curr_node.children,new NodeComparator());
-		/*System.out.print("Children: ");
-		for (Node n:curr_node.children) System.out.print("Action: " + n.action+ " Value "+ n.ISUCT() +
-				" ");
-		System.out.println();*/
 		Card c = curr_node.children.get(curr_node.children.size()-1).action;
-		//System.out.println("Playing: " + c.toString());
 		return c;
 	}
 
@@ -281,7 +227,6 @@ class NodeComparator implements Comparator<Node> {
 	public int compare(Node a, Node b) {
         // more efficient
         return a.num_visits - b.num_visits;
-		//return a.num_visits < b.num_visits ? 1 : a.num_visits == b.num_visits ? 0 : -1;
 	}
 }
 
@@ -310,7 +255,7 @@ class State {
 		player_hands[1] = new LinkedList();
 		player_hands[2] = new LinkedList();
 		num_tricks = 0;
-		max_tricks = max_depth; // 18 Moves ahead
+		max_tricks = max_depth;
 		num_wins = new int[] {0,0,0};
 	}
 
@@ -422,6 +367,12 @@ class State {
 		}
 	}
 
+	/**
+	 * Returns the best suit this player has
+	 * @param player_index 		The player 0-2 we are checking
+	 * @param searchSuit		The suit 0-3 (see main agent for order) we want to see if they have
+	 * @return
+	 */
 	private Card getBestCardFromSuit(int player_index, Suit searchSuit) {
 		Card bestCard = null;
 		for (Card c: player_hands[player_index]) {
@@ -431,15 +382,27 @@ class State {
 		return bestCard;
 	}
 
+	/**
+	 * @param player_index		The player 0-2 we are checking to see if they have a specific suit
+	 * @param searchSuit		The suit we want to check for.
+	 * @return					True if the player has this card.
+	 */
 	public boolean playerHasSuit(int player_index, Suit searchSuit) {
 		for (Card c:player_hands[player_index]) if (c.suit==searchSuit) return true;
 		return false;
 	}
 
+	/**
+	 * @return					winningCards() but with all cards available
+	 */
 	public List<Card> getWinningCards() {
 		return getWinningCards(this.availableActions());
 	}
 
+	/**
+	 * @param availableMoves	The input list of cards we want to see has any good ones
+	 * @return					The List of good cards to choose
+	 */
 	public List<Card> getWinningCards(List<Card> availableMoves) {
 		List<Card> bestMoves = new LinkedList();
 		int player_next1 = (player+1)%3;
@@ -562,6 +525,9 @@ class State {
 		return availableMoves;
 	}
 
+	/**
+	 * @return				The player index that won this trick.
+	 */
 	private int calcWinner() {
 		Card best = trick.get(0); //Index 0 is player to the left of the last player in the trick (player)
 		Suit s = best.suit;
@@ -583,6 +549,10 @@ class State {
 		}
 	}
 
+	/**
+	 * @param playerIndex			The player we want to see how many playoffs they've won.
+	 * @return						The number of wins this player has.
+	 */
 	public int getWins(int playerIndex) { return num_wins[playerIndex]; }
 
 	/**
@@ -605,7 +575,7 @@ class State {
 		return s;
 	}
 }
-
+// Used to store the information set which we determinise from to create a state for the player.
 class Node {
 
 	//Controls how important exploration of the tree is wrt. average value of a node.
@@ -638,9 +608,6 @@ class Node {
 			if (available.contains(n.action)) { nodes.add(n); }
 		}
 		Collections.sort(nodes,new ISUCTComparator());
-		//System.out.println("UCT Scores: ");
-		//for (Node n:nodes) System.out.println(n.ISUCT() + " ");
-		//System.out.println("Selecting: "+nodes.get(nodes.size()-1).ISUCT());
 		return nodes.get(nodes.size()-1);
 	}
 
@@ -681,7 +648,6 @@ class ISUCTComparator implements Comparator<Node> {
 	@Override
 	public int compare(Node a, Node b) {
 		return Double.compare(a.ISUCT(), b.ISUCT());
-		//a.ISUCT() > b.ISUCT() ? -1 : a.ISUCT() < b.ISUCT() ? 1 : 0;
 	}
 
 }
@@ -704,7 +670,6 @@ class CardComparator implements Comparator<Card> {
         int x;
         if (sortBy) {
              x = Integer.compare(a.rank, b.rank);
-             //x = a.rank < b.rank ? 1 : a.rank == b.rank ? 0 : -1;
             if (x == 0) {
                 return a.suit.toString().compareTo(b.suit.toString());
             }

@@ -164,7 +164,8 @@ class State {
 		int player_next1 = (player+1)%3;
 		int player_next2 = (player+2)%3;
 		if (trick.size() == 0) {
-			Card highest = availableMoves.get(availableMoves.size()-1); //Play highest?
+			Card highest = null;
+			if (availableMoves.size() > 0) highest = availableMoves.get(availableMoves.size()-1); //Play highest?
 			Card spade = null;
 			for (Card c:availableMoves) {
 					//if the player is missing a suit and doesnt have spades then play that card
@@ -189,7 +190,7 @@ class State {
 						if (c.rank > highest.rank && highest!=spade) highest = c;
 					}
 			}
-			if (!bestMoves.contains(highest)) {
+			if (!bestMoves.contains(highest) && highest != null) {
 				//if (player==0)System.out.println("Highest: " + highest.toString());
 				bestMoves.add(highest);
 			}
