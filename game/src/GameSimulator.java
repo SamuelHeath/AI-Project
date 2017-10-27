@@ -1,7 +1,8 @@
 import java.util.*;
 
 /**
- * Created by Sam on 15-Oct-17.
+ * @author Sam Heath (21725083)
+ * @author Andre Wang (21714084)
  */
 public class GameSimulator {
 

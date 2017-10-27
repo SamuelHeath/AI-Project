@@ -3,6 +3,8 @@ import java.util.*;
 /**
  * Represents an instantiation of a particular game state.
  * ie. a determinisation.
+ * @author Andre Wang (21714084)
+ * @author Sam Heath (21725083)
  */
 public class MOState {
     private List<Card> unseen;
