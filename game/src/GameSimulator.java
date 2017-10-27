@@ -22,7 +22,7 @@ public class GameSimulator {
 		System.out.println("Number of games per sim: " + 10);
 		System.out.println("Number of rounds per game: " + 5);
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
         	playGameManyTimes(10, rounds, a,b,c,0.0);
 		}
 }

@@ -10,6 +10,8 @@ public class Agent implements MSWAgent {
 
 	public static double explore = 1.683864981087254;
 	private int depth = 9; //number of tricks to look ahead by
+	//public static double explore = 2.7723809803587756;
+	//private int depth = 15; //number of tricks to look ahead by
 
 	private int[] num_wins;
 	private String name = "Carlos";

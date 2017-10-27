@@ -13,10 +13,14 @@ public class Agent21725083 implements MSWAgent {
 	//explore = 1.0/Math.sqrt(2);
 	depth = 9;
 */
-	//public static double explore = 1.683864981087254;
-	//private int depth = 9;
-	public static double explore = 2.7723809803587756;
-	private int depth = 15; //number of tricks to look ahead by
+	/**
+	 * I found these to be the best coefficients on my machine! good balance between depth and width
+	 */
+	public static double explore = 1.683864981087254;
+	private int depth = 9;
+
+	//public static double explore = 2.7723809803587756;
+	//private int depth = 15; //number of tricks to look ahead by
 
 	private int[] num_wins;
 	private String name = "Carlos";
