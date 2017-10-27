@@ -1,7 +1,8 @@
 import java.util.*;
 
 /**
- * Created by Sam on 15-Oct-17.
+ * @author Sam Heath (21725083)
+ * @author Andre Wang (21714084)
  */
 public class GameSimulator {
 
@@ -10,7 +11,7 @@ public class GameSimulator {
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
 
-		int rounds = 1;
+		int rounds = 5;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
         MSWAgent a = new Agent("Carlos");
@@ -22,7 +23,7 @@ public class GameSimulator {
 		System.out.println("Number of rounds per game: " + 5);
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
         for (int i = 0; i < 10; i++) {
-        	playGameManyTimes(2, rounds, a,b,c,0.0);
+        	playGameManyTimes(10, rounds, a,b,c,0.0);
 		}
 		Agent a_convert = (Agent)a;
 		for (int i = 0; i < 16; i++) {

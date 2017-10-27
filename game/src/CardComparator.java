@@ -1,5 +1,8 @@
 import java.util.Comparator;
-
+/**
+ * @author Sam Heath (21725083)
+ * @author Andre Wang (21714084)
+ */
 class CardComparator implements Comparator<Card> {
     boolean sortBy; // sort by rank first?
     boolean lowestWinningCard = false;

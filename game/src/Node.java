@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by Sam on 23-Sep-17.
+ * @author Sam Heath (21725083)
+ * @author Andre Wang (21714084)
  */
 public class Node {
 

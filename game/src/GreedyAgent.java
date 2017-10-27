@@ -1,5 +1,8 @@
 import java.util.*;
-
+/**
+ * @author Sam Heath (21725083)
+ * @author Andre Wang (21714084)
+ */
 public class GreedyAgent implements MSWAgent{
 
     public List<Card> hand;

@@ -3,6 +3,8 @@ import java.util.*;
 /**
  * Represents an instantiation of a particular game state.
  * ie. a determinisation.
+ * @author Andre Wang (21714084)
+ * @author Sam Heath (21725083)
  */
 public class MOState {
     private List<Card> unseen;
@@ -151,8 +153,6 @@ public class MOState {
        // If we get up to this point, it's a bit concerning...
        Random rand = new Random();
        List<Card> handlist = new ArrayList<>(hand);
-       //System.out.println(handlist);
-       //System.out.println(validSuits + "\t" + otherSuits);
        return handlist.get(rand.nextInt(handlist.size()));
    }
 

@@ -24,9 +24,10 @@ def plot(agentName, *args):
         ax.errorbar(xVals, yVals, yerr=stdErr, capsize=3, label=filename)
     ax.set_ylabel("Win rate")
     ax.set_xlabel("Exploration coefficient")
-    ax.xaxis.label.set_size(16)
-    ax.yaxis.label.set_size(16)
-    plt.legend(loc="best", fontsize=14)
+    ax.xaxis.label.set_size(14)
+    ax.yaxis.label.set_size(14)
+    plt.legend(loc="best", fontsize=12)
+    plt.tick_params(axis='both', which='both', labelsize=12)
     return fig
 
 if __name__ == "__main__":

@@ -266,7 +266,6 @@ public class AgentTwo implements MSWAgent {
     public void seeCard(Card card, String agent) {
         trick[players.get(agent)] = card;
         moveUnseenToSeen(card);
-        //System.out.println(agent + " played " + card);
         // If my card, then remove it from my hand.
         if (agent == this.NAME) {
             hand.remove(card);
@@ -276,7 +275,6 @@ public class AgentTwo implements MSWAgent {
             int pnum = players.get(agent);
             if (pnum != playerNum) {
                 isValidSuit.get(pnum).put(trick[firstPlayer].suit, false);
-                //System.out.println(pnum + " doesn't have " + trick[firstPlayer].suit);
                 // CHECK: if both opponents don't have a particular suit
                 // then let's remove those suits from unseen.
                 for (int k : isValidSuit.keySet()) {
@@ -289,7 +287,6 @@ public class AgentTwo implements MSWAgent {
                         for (Card c : unseen) {
                             if (c.suit == trick[firstPlayer].suit) toBeRemoved.add(c);
                         }
-                        //System.out.println(toBeRemoved.size() + " cards removed");
                         numberRemoved += toBeRemoved.size();
                         unseen.removeAll(toBeRemoved);
                     }
