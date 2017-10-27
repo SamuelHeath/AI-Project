@@ -9,6 +9,12 @@ The agents are implemented under `game/src/` as `Agent.java` and `AgentTwo.java`
 
 A sample 'game simulator' is available in `GameSimulator.java`.
 
+It is assumed that the following files are available:
+
+- `MossSideWhist.java` (game definition)
+- `Card.java` (card definitions)
+- `MSWAgent.java` (the interface)
+
 ## Data
 
 Experimental data is available under `data/`.
