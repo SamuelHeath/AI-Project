@@ -101,9 +101,10 @@ public class AgentTwo implements MSWAgent {
         }
         // Discard greedily, choosing the worst four cards.
         // TODO is there a better way? probably. Even MCTS here?
-        Comparator<Card> cc = new CardComparator(true);
+        Comparator<Card> cc = new MyCardComparator();
         List<Card> cards = new ArrayList<>(hand);
         cards.sort(cc);
+        System.out.println(cards);
         Card[] discard = new Card[4];
         int numberDiscarded = 0;
         for (int i = 0; i < cards.size() && numberDiscarded < 4; i++) {

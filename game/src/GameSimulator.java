@@ -14,8 +14,8 @@ public class GameSimulator {
 		int rounds = 5;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
-        MSWAgent a = new Agent("Carlos");
-        MSWAgent b = new AgentTwo();
+        MSWAgent a = new AgentTwo();
+        MSWAgent b = new RandomAgent();
         MSWAgent c = new RandomAgent();
 
 		System.out.println("Number of sims: " + 10);
