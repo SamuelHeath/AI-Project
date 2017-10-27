@@ -24,8 +24,6 @@ public class Agent implements MSWAgent {
 	List<Card> trick;
 	int trick_count = 0;
 
-	int[] trickToIteration = new int[16];
-
 	public void setup(String agentLeft, String agentRight) {
 		AGENTMAP = new HashMap();
 		AGENTMAP.put(this.name,0);
@@ -38,11 +36,9 @@ public class Agent implements MSWAgent {
 		SUITMAP.put(Suit.SPADES,3);
 		num_wins = new int[] {0,0,0};
 		ArrayList<Card> deck = new ArrayList<>(Arrays.asList(Card.values()));
-		Collections.sort(deck,new CardComparator(true)); // Can't Remember why I did this
 		for (Card c : deck) {
 			unSeen.add(c);
 		}
-		for (int i = 0; i < 16; i++) trickToIteration[i] = 0;
 		hand = new LinkedList();
 		trick = new LinkedList();
 		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
@@ -85,7 +81,6 @@ public class Agent implements MSWAgent {
 		}
 	}
 
-
     /**
      * Agent returns the card they wish to play.
      * A 200 ms timelimit is given for this method
@@ -95,8 +90,8 @@ public class Agent implements MSWAgent {
 		long playTime = 185; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
-		State curr_state = new State(this.trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0
-		// represents THIS player
+		//0 represents THIS player
+		State curr_state = new State(this.trick,0,this.unSeen,this.hand,depth,playerHasSuit);
 
 		/*if (trick.size() > 0) {
 			System.out.print("Trick: ");
@@ -183,7 +178,6 @@ public class Agent implements MSWAgent {
 		return c;
 	}
 
-
     /**
      * Sees an Agent play a card.
      * A 50 ms timelimit is given to this function.
@@ -201,7 +195,6 @@ public class Agent implements MSWAgent {
 		}
 	}
 
-
     /**
      * See the result of the trick.
      * A 50 ms timelimit is given to this method.
@@ -210,13 +203,7 @@ public class Agent implements MSWAgent {
      */
 	public void seeResult(String winner) {
 		trick.clear();
-		if (winner.equals(this.name)) {
-
-		} else {
-			//set 0
-		}
 	}
-
 
     /**
      * See the score for each player.
@@ -249,9 +236,7 @@ class NodeComparator implements Comparator<Node> {
 
 	@Override
 	public int compare(Node a, Node b) {
-        // more efficient
         return a.num_visits - b.num_visits;
-		//return a.num_visits < b.num_visits ? 1 : a.num_visits == b.num_visits ? 0 : -1;
 	}
 }
 

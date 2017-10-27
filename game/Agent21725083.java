@@ -45,7 +45,6 @@ public class Agent21725083 implements MSWAgent {
 		for (Card c : deck) {
 			unSeen.add(c);
 		}
-		for (int i = 0; i < 16; i++) trickToIteration[i] = 0;
 		hand = new LinkedList();
 		trick = new LinkedList();
 		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
@@ -62,10 +61,10 @@ public class Agent21725083 implements MSWAgent {
 		}
 	}
 
-    /**
-     * This method will be called on the leader agent, after the deal.
-     * If the agent is not the leader, it is sufficient to return an empty array.
-     */
+	/**
+	 * This method will be called on the leader agent, after the deal.
+	 * If the agent is not the leader, it is sufficient to return an empty array.
+	 */
 	public Card[] discard() {
 		if (!lead) {
 			return new Card[] {};
@@ -82,12 +81,11 @@ public class Agent21725083 implements MSWAgent {
 					ditch[count++] = d; // do not mutate the hand yet
 				}
 			}
-			// update our hand
 			for (Card c:ditch) hand.remove(c);
+			// update our hand
 			return ditch;
 		}
 	}
-
 
     /**
      * Agent returns the card they wish to play.
@@ -103,6 +101,7 @@ public class Agent21725083 implements MSWAgent {
 
 		Random rand = new Random();
 		int x = 0;
+
 		//System.out.println("Expansion: "+(int)(223*Math.exp(0.3005*trick_count)));
 		while (System.currentTimeMillis()-startTime < playTime) {
 			//Information Set Monte Carlo Tree Search updating curr_node and state.
@@ -124,7 +123,6 @@ public class Agent21725083 implements MSWAgent {
 
 				List<Card> winningMoves = state.getWinningCards(actions_to_expand); //Expand nodes we can win
 				if (winningMoves.size() > 0) {
-					Collections.sort(winningMoves,new CardComparator(true));
 					action = winningMoves.get(rand.nextInt(winningMoves.size()));
 				} else action = actions_to_expand.get(rand.nextInt(actions_to_expand.size())); //No winning cards
 				curr_node = curr_node.addChild(action, state.player);
@@ -135,8 +133,6 @@ public class Agent21725083 implements MSWAgent {
 			while (state.availableActions().size() > 0 && curr_state.canGoDeepa()) {
 				//Apply heuristic here
 				List<Card> winning_moves = state.getWinningCards();
-				//Sort by lowest spade
-				Collections.sort(winning_moves,new CardComparator(false,true));
 				//From the moves which will get us a win choose the lowest, if no cards allow us a win play best card
 				if (winning_moves.size() != 0) {
 					state.performAction(winning_moves.get(rand.nextInt(winning_moves.size())));
@@ -163,12 +159,12 @@ public class Agent21725083 implements MSWAgent {
 	}
 
 
-    /**
-     * Sees an Agent play a card.
-     * A 50 ms timelimit is given to this function.
-     * @param card, the Card played.
-     * @param agent, the name of the agent who played the card.
-     */
+	/**
+	 * Sees an Agent play a card.
+	 * A 50 ms timelimit is given to this function.
+	 * @param card, the Card played.
+	 * @param agent, the name of the agent who played the card.
+	 */
 	public void seeCard(Card card, String agent) {
 		trick.add(card);
 		if (agent.equals(this.name)) this.hand.remove(card);
@@ -180,29 +176,21 @@ public class Agent21725083 implements MSWAgent {
 		}
 	}
 
-
-    /**
-     * See the result of the trick.
-     * A 50 ms timelimit is given to this method.
-     * This method will be called on each eagent at the end of each trick.
-     * @param winner, the player who played the winning card.
-     */
+	/**
+	 * See the result of the trick.
+	 * A 50 ms timelimit is given to this method.
+	 * This method will be called on each eagent at the end of each trick.
+	 * @param winner, the player who played the winning card.
+	 */
 	public void seeResult(String winner) {
 		trick.clear();
-		trick_count++;
-		if (winner.equals(this.name)) {
-
-		} else {
-			//set 0
-		}
 	}
 
-
-    /**
-     * See the score for each player.
-     * A 50 ms timelimit is givien to this method
-     * @param scoreboard, a Map from agent names to their score.
-     */
+	/**
+	 * See the score for each player.
+	 * A 50 ms timelimit is givien to this method
+	 * @param scoreboard, a Map from agent names to their score.
+	 */
 	public void seeScore(Map<String,Integer> scoreboard) {
 		unSeen.clear();
 		hand.clear();
@@ -212,11 +200,11 @@ public class Agent21725083 implements MSWAgent {
 		unSeen = new LinkedList(Arrays.asList(Card.values()));
 	}
 
-    /**
-     * Returns the Agents name.
-     * A 10ms timelimit is given here.
-     * This method will only be called once.
-     */
+	/**
+	 * Returns the Agents name.
+	 * A 10ms timelimit is given here.
+	 * This method will only be called once.
+	 */
 	public String sayName() {
 		return this.name;
 	}
@@ -229,8 +217,7 @@ class NodeComparator implements Comparator<Node> {
 
 	@Override
 	public int compare(Node a, Node b) {
-        // more efficient
-        return a.num_visits - b.num_visits;
+		return a.num_visits - b.num_visits;
 	}
 }
 
@@ -588,9 +575,6 @@ class Node {
 			if (available.contains(n.action)) { nodes.add(n); }
 		}
 		Collections.sort(nodes,new ISUCTComparator());
-		//System.out.println("UCT Scores: ");
-		//for (Node n:nodes) System.out.println(n.ISUCT() + " ");
-		//System.out.println("Selecting: "+nodes.get(nodes.size()-1).ISUCT());
 		return nodes.get(nodes.size()-1);
 	}
 
@@ -615,7 +599,8 @@ class Node {
 	 */
 	public double ISUCT() {
 		//Depending on time add heuristic (h(i)) which helps choose nodes via h(i)/num_visits.
-		return ((double) num_wins /(double) num_visits) + Agent.explore*Math.sqrt(Math.log((double)parent
+		return ((double) num_wins /(double) num_visits) + Agent21725083.explore*Math.sqrt(Math.log(
+				(double)parent
 				.num_visits)/(double) num_visits);
 	}
 
@@ -623,7 +608,6 @@ class Node {
 		children.add(new Node(this,action,player));
 		return children.get(children.size()-1); // Get the last added child.
 	}
-
 }
 
 class ISUCTComparator implements Comparator<Node> {
@@ -631,7 +615,39 @@ class ISUCTComparator implements Comparator<Node> {
 	@Override
 	public int compare(Node a, Node b) {
 		return Double.compare(a.ISUCT(), b.ISUCT());
-		//a.ISUCT() > b.ISUCT() ? -1 : a.ISUCT() < b.ISUCT() ? 1 : 0;
 	}
 
+}
+
+class CardComparator implements Comparator<Card> {
+	boolean sortBy; // sort by rank first?
+	boolean lowestWinningCard = false;
+
+	public CardComparator(boolean sortByRank) {
+		sortBy = sortByRank;
+	}
+
+	public CardComparator(boolean sortByRank, boolean lowestSpade) {
+		sortBy = sortByRank;
+		lowestWinningCard = lowestSpade;
+	}
+
+	@Override
+	public int compare(Card a, Card b) {
+		int x;
+		if (sortBy) {
+			x = Integer.compare(a.rank, b.rank);
+			if (x == 0) {
+				return a.suit.toString().compareTo(b.suit.toString());
+			}
+			else return x;
+		}
+		else if (lowestWinningCard) {
+			x = Integer.compare(a.rank,b.rank);
+			if (x == 0) {
+				return -1*a.suit.toString().compareTo(b.suit.toString());
+			} else return x;
+		}
+		else return a.toString().compareTo(b.toString());
+	}
 }
