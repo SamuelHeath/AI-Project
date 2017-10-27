@@ -5,9 +5,13 @@ Sam Heath, Andre Wang
 
 
 ## Instructions
-The agents are implemented as Agent.java and AgentTwo.java. Both implement the MSWAgent interface, so they can be used as parameters to the MossSideWhist constructor.
+The agents are implemented under `game/src/` as `Agent.java` and `AgentTwo.java`. Both implement the `MSWAgent` interface so they can be used as parameters to the `MossSideWhist` constructor.
 
-A sample 'game simulator' is available in GameSimulator.java.
+A sample 'game simulator' is available in `GameSimulator.java`.
+
+## Data
+
+Experimental data is available under `data/`.
 
 
 
