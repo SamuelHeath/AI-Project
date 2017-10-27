@@ -14,15 +14,15 @@ public class GameSimulator {
 		int rounds = 5;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
-        MSWAgent a = new Agent("Carlos");
-        MSWAgent b = new RandomAgent();
-        MSWAgent c = new RandomAgent();
+        MSWAgent a = new Agent();
+        MSWAgent b = new GreedyNaive("Ab");
+        MSWAgent c = new GreedyNaive("Sa");
 
 		System.out.println("Number of sims: " + 10);
 		System.out.println("Number of games per sim: " + 10);
 		System.out.println("Number of rounds per game: " + 5);
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
         	playGameManyTimes(10, rounds, a,b,c,0.0);
 		}
 }

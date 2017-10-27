@@ -26,8 +26,8 @@ public class GameSimulatorGA {
 		Collections.sort(deck, new CardComparator(true));
 
 		int games = 2;
-		MossSideWhist game = new MossSideWhist(testingAgent, new Agent("Sam"),
-				new Agent("Sam1"));
+		MossSideWhist game = new MossSideWhist(testingAgent, new AgentTwo(),
+				new GreedyAgent());
 		game.playGame(games, System.out);
 		gameResult.putIfAbsent("Carlo Monty", 0);
 		gameResult.put("Carlo Monty", game.getScores().get("Carlo Monty")+gameResult.get("Carlo Monty"));

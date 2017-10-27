@@ -12,7 +12,7 @@ public class Agent implements MSWAgent {
 	private int depth = 9; //number of tricks to look ahead by
 
 	private int[] num_wins;
-	private String name = "Carlos Monty";
+	private String name = "Carlos";
 	public static boolean lead;
 	private List<Card> seen = new ArrayList<>(52);
 	private List<Card> unSeen = new ArrayList<>(52);

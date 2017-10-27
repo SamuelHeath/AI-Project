@@ -13,12 +13,13 @@ public class Agent21725083 implements MSWAgent {
 	//explore = 1.0/Math.sqrt(2);
 	depth = 9;
 */
-
-	public static double explore = 1.683864981087254;
-	private int depth = 9; //number of tricks to look ahead by
+	//public static double explore = 1.683864981087254;
+	//private int depth = 9;
+	public static double explore = 2.7723809803587756;
+	private int depth = 15; //number of tricks to look ahead by
 
 	private int[] num_wins;
-	private String name = "Carlo Monty";
+	private String name = "Carlos";
 	public static boolean lead;
 	private List<Card> seen = new ArrayList<>(52);
 	private List<Card> unSeen = new ArrayList<>(52);
@@ -93,7 +94,7 @@ public class Agent21725083 implements MSWAgent {
      * @return the Card they wish to play.
      */
 	public Card playCard() {
-		long playTime = 185; // give 185ms to explore and respond.
+		long playTime = 180; // give 185ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
 		State curr_state = new State(this.trick,0,this.unSeen,this.hand, depth,playerHasSuit); //0

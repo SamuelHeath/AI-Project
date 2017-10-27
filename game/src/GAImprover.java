@@ -45,7 +45,7 @@ public class GAImprover {
 		System.out.println(representation);
 		System.out.println("Depth: " + (int)Math.floor(representation/100.0) + " Exploration: " +
 				""+representation%10.0);
-		Agent a = new Agent("Carlo Monty");
+		Agent a = new Agent();
 		GameSimulatorGA game = new GameSimulatorGA(a,++count);
 		gameSimulators.add(game);
 		agentMap.put(count,representation);
@@ -55,7 +55,7 @@ public class GAImprover {
 		int new_depth = Math.round((float)((Math.floor(a/100.0)+Math.floor(b/100.0))/2.0))*100;
 		double representation = Math.round(new_depth) + ((a%10.0)+(b%10.0))/2.0; //Average
 		// components
-		Agent a1 = new Agent("Carlo Monty");
+		Agent a1 = new Agent();
 		GameSimulatorGA game = new GameSimulatorGA(a1,++count);
 		gameSimulators.add(game);
 		agentMap.put(count,representation);
