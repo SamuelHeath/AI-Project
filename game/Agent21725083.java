@@ -324,7 +324,7 @@ class State {
 		List<Card> cardsForBoth = new LinkedList(); //Cards either player could have based on our info
 
 		int size = cards.size();
-		if (!Agent.lead && size <= 36 && size >= 32) { // You aren't the leader and u may not have
+		if (!Agent21725083.lead && size <= 36 && size >= 32) { // You aren't the leader and u may not have
 			// started the game
 			Collections.sort(cards, new CardComparator(true));
 			for (int i = 0; i < 4; i++) {
@@ -339,11 +339,11 @@ class State {
 		Collections.shuffle(this.unseen);
 
 		for (int i = 0; i < size; i++) {
-			if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+			if (suitAvail[1][Agent21725083.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent21725083.SUITMAP.get(cards.get(i).suit)]) {
 				cardsForBoth.add(cards.get(i));
-			} else if (suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && !suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+			} else if (suitAvail[1][Agent21725083.SUITMAP.get(cards.get(i).suit)] && !suitAvail[2][Agent21725083.SUITMAP.get(cards.get(i).suit)]) {
 				player_hands[1].add(cards.get(i));
-			} else if (!suitAvail[1][Agent.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent.SUITMAP.get(cards.get(i).suit)]) {
+			} else if (!suitAvail[1][Agent21725083.SUITMAP.get(cards.get(i).suit)] && suitAvail[2][Agent21725083.SUITMAP.get(cards.get(i).suit)]) {
 				player_hands[2].add(cards.get(i));
 			}
 		}
@@ -606,7 +606,7 @@ class State {
 	}
 }
 
-public class Node {
+class Node {
 
 	//Controls how important exploration of the tree is wrt. average value of a node.
 	private static double EXP_FACTOR = 1.0/Math.sqrt(2);
@@ -665,7 +665,7 @@ public class Node {
 	 */
 	public double ISUCT() {
 		//Depending on time add heuristic (h(i)) which helps choose nodes via h(i)/num_visits.
-		return ((double) num_wins /(double) num_visits) + Agent.explore*Math.sqrt(Math.log((double)parent
+		return ((double) num_wins /(double) num_visits) + Agent21725083.explore*Math.sqrt(Math.log((double)parent
 				.num_visits)/(double) num_visits);
 	}
 
