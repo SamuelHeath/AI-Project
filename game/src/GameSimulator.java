@@ -25,6 +25,10 @@ public class GameSimulator {
         for (int i = 0; i < 10; i++) {
         	playGameManyTimes(10, rounds, a,b,c,0.0);
 		}
+		Agent a_convert = (Agent)a;
+		for (int i = 0; i < 16; i++) {
+			System.out.println(a_convert.trickToIteration[i]);
+		}
 }
 
 	private static String playGame(int nGames, MSWAgent a, MSWAgent b, MSWAgent c) {

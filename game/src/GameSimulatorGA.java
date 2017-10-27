@@ -29,8 +29,8 @@ public class GameSimulatorGA {
 		MossSideWhist game = new MossSideWhist(testingAgent, new Agent("Sam"),
 				new Agent("Sam1"));
 		game.playGame(games, System.out);
-
-		gameResult = game.getScores();
+		gameResult.putIfAbsent("Carlo Monty", 0);
+		gameResult.put("Carlo Monty", game.getScores().get("Carlo Monty")+gameResult.get("Carlo Monty"));
 		//for (Card c:deck)
 		//System.out.println(c.toString());
 	}
