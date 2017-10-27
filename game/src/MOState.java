@@ -153,8 +153,6 @@ public class MOState {
        // If we get up to this point, it's a bit concerning...
        Random rand = new Random();
        List<Card> handlist = new ArrayList<>(hand);
-       //System.out.println(handlist);
-       //System.out.println(validSuits + "\t" + otherSuits);
        return handlist.get(rand.nextInt(handlist.size()));
    }
 
