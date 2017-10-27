@@ -161,6 +161,7 @@ class State {
 
 	public List<Card> getWinningCards(List<Card> availableMoves) {
 		List<Card> bestMoves = new LinkedList();
+		if (availableMoves.size() == 0) return bestMoves;
 		int player_next1 = (player+1)%3;
 		int player_next2 = (player+2)%3;
 		if (trick.size() == 0) {
@@ -206,23 +207,26 @@ class State {
 		Collections.sort(availableMoves);
 		if (trick.size() == 1) {
 			if (playerHasSuit(player,orig.suit)) { //original suit
-				Card worst = availableMoves.get(0);
+				Card worst = availableMoves.get(0); //get worst.
 				for (Card c:availableMoves) {
 					if (c.suit == orig.suit) { //If we can play this
-						if (playerHasSuit(playerNext,orig.suit)) {
-							if (getBestCardFromSuit(player_next1,orig.suit) != null && getBestCardFromSuit(playerNext, orig.suit)
-									.rank< c.rank) {
-								bestMoves.add(c);
+						if (c.rank > orig.rank) { //if we can beat the original card with this one
+							if (playerHasSuit(playerNext, orig.suit)) { //can we beat the next player
+								if (getBestCardFromSuit(player_next1, orig.suit) != null && getBestCardFromSuit(playerNext, orig.suit)
+										.rank < c.rank) {
+									bestMoves.add(c);
+								} else {
+									if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c;
+								}
+								//If the next player doesnt have the correct suit
 							} else {
-								if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c;
-							}
-							//If the next player doesnt have the correct suit
-						} else {
-							//Wrong suit but they can play spades
-							if (playerHasSuit(playerNext,Suit.SPADES)) {
-								if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c; //Here we lose worst
-							} else {
-								if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c; //Here we win with worst
+								//Wrong suit but they can play spades
+								if (playerHasSuit(playerNext, Suit.SPADES)) {
+									if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c; //Here we lose worst
+								} else {
+									if (worst.rank > c.rank && c.suit != Suit.SPADES)
+										worst = c; //Here we win with worst
+								}
 							}
 						}
 					}
@@ -230,19 +234,16 @@ class State {
 				if (bestMoves.size() == 0) bestMoves.add(worst);
 				return bestMoves;
 			} else {
-				if (toBeat.suit != Suit.SPADES && !playerHasSuit(player,toBeat.suit) && playerHasSuit
-						(playerNext,Suit.SPADES)) {
-					Card bestNextCard = getBestCardFromSuit(playerNext, Suit.SPADES);
-					for (Card c : availableMoves) {
-						if (bestNextCard != null && c.suit == Suit.SPADES && c.rank > bestNextCard.rank)
-							bestMoves.add(c);
-					}
-					return bestMoves; //Could be no best moves
+				if (!playerHasSuit(playerNext, Suit.SPADES)) {
+						Card bestNextCard = getBestCardFromSuit(player, Suit.SPADES);
+						if (bestNextCard != null) bestMoves.add(bestNextCard);
+						return bestMoves; //Could be no best moves
 				}
+				bestMoves.add(availableMoves.get(0));
 			}
 		} else if (trick.size() == 2) { // 2 cards Played ur last player
 			Card c1 = trick.get(1);
-			if (c1.suit != orig.suit) {
+			if (c1.suit != toBeat.suit) {
 				if (c1.suit == Suit.SPADES) { //c1 will beat first card
 					toBeat = c1;
 				} //original is still the best card
@@ -277,6 +278,7 @@ class State {
 					bestMoves.add(availableMoves.get(0)); //Worst
 					return bestMoves;
 				}
+				bestMoves.add(availableMoves.get(0));
 			}
 		}
 		return availableMoves;

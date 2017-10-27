@@ -154,8 +154,12 @@ public class Agent21725083 implements MSWAgent {
 			x++;
 		}
 		Collections.sort(curr_node.children,new NodeComparator());
-		Card c = curr_node.children.get(curr_node.children.size()-1).action;
-		return c;
+		if (curr_node.children.size() > 0) {
+			Card c = curr_node.children.get(curr_node.children.size() - 1).action;
+			return c;
+		} else {
+			return this.hand.get(rand.nextInt(this.hand.size())); //Random if we somehow get an error
+		}
 	}
 
 

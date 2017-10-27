@@ -147,7 +147,7 @@ public class MossSideWhist{
     if(!hand.remove(lead))
       lead = hand.remove(rand.nextInt(hand.size()));
     showCards(lead, first);
-  //report.println(lead);
+  report.println(lead);
   display(second, true);  
     Card next = agents.get(second).playCard();
     hand = hands.get(second);
@@ -155,7 +155,7 @@ public class MossSideWhist{
       next = hand.get(rand.nextInt(hand.size()));
     hand.remove(next);
     showCards(next, second);
-  //report.println(next);
+  report.println(next);
   display(third, true);  
     Card last = agents.get(third).playCard();
     hand = hands.get(third);
@@ -163,12 +163,12 @@ public class MossSideWhist{
       last = hand.get(rand.nextInt(hand.size()));
     hand.remove(last);
     showCards(last, third);
-  //report.println(last);
+  report.println(last);
     String winner = getWinner(lead, next, last, first, second, third);
     agents.get(leader).seeResult(winner);
     agents.get(left).seeResult(winner);
     agents.get(right).seeResult(winner);
-  //report.println(winner+" wins the trick!");
+  report.println(winner+" wins the trick!");
     return winner;
   }
 

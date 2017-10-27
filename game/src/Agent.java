@@ -111,6 +111,12 @@ public class Agent implements MSWAgent {
 		State curr_state = new State(this.trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0
 		// represents THIS player
 
+		if (trick.size() > 0) {
+			System.out.print("Trick: ");
+			for (Card c:trick) System.out.print(c.toString()+" ");
+			System.out.println();
+		}
+
 		Random rand = new Random();
 		int x = 0;
 		//System.out.println("Expansion: "+(int)(177.79*Math.exp(0.2995*trick_count)));
@@ -126,17 +132,11 @@ public class Agent implements MSWAgent {
 				state.performAction(curr_node.action);
 			}
 
-			if (trick.size() > 0) {
-				System.out.print("Trick: ");
-				for (Card c:trick) System.out.print(c.toString()+" ");
-				System.out.println();
-			}
-
 			List<Card> wins = state.getWinningCards();
 			List<Card> moves = state.availableActions();
 			System.out.print("Moves Available: ");
 			for (Card c:moves) {
-				System.out.print(c.toString()+" ");
+				System.out.print(c+" ");
 			}
 			if (state.trick.size()>0) {
 				System.out.print("Has suit: "+state.playerHasSuit(0,state.trick.get(0).suit));
