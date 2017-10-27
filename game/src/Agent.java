@@ -8,11 +8,11 @@ import java.util.*;
  */
 public class Agent implements MSWAgent {
 
-	public static double explore;
-	private int dep; //number of tricks to look ahead by
+	public static double explore = 1.683864981087254;
+	private int depth = 9; //number of tricks to look ahead by
 
 	private int[] num_wins;
-	private String name = "Carlo Monty";
+	private String name = "Carlos Monty";
 	public static boolean lead;
 	private List<Card> seen = new ArrayList<>(52);
 	private List<Card> unSeen = new ArrayList<>(52);
@@ -25,19 +25,6 @@ public class Agent implements MSWAgent {
 	int trick_count = 0;
 
 	int[] trickToIteration = new int[16];
-
-	public Agent(double exploration, int depth) {
-		explore = exploration;
-		dep = depth;
-	}
-
-	public Agent(String name) {
-		this.name = name;
-		explore = 1.683864981087254;
-		//explore = 3.884345602601573; //GA obtained
-		//explore = 1.0/Math.sqrt(2);
-		dep = 9;
-	}
 
 	public void setup(String agentLeft, String agentRight) {
 		AGENTMAP = new HashMap();
@@ -105,22 +92,21 @@ public class Agent implements MSWAgent {
      * @return the Card they wish to play.
      */
 	public Card playCard() {
-		long playTime = 190; // give 200ms to explore and respond.
+		long playTime = 185; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
 		State curr_state = new State(this.trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0
 		// represents THIS player
 
-		if (trick.size() > 0) {
+		/*if (trick.size() > 0) {
 			System.out.print("Trick: ");
 			for (Card c:trick) System.out.print(c.toString()+" ");
 			System.out.println();
-		}
+		}*/
 
 		Random rand = new Random();
 		int x = 0;
-		//System.out.println("Expansion: "+(int)(177.79*Math.exp(0.2995*trick_count)));
-		while (System.currentTimeMillis()-startTime < playTime & x < 1) {
+		while (System.currentTimeMillis()-startTime < playTime && x < 1000) {
 			//Information Set Monte Carlo Tree Search updating curr_node and state.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesn't know what others have.
@@ -132,7 +118,7 @@ public class Agent implements MSWAgent {
 				state.performAction(curr_node.action);
 			}
 
-			List<Card> wins = state.getWinningCards();
+			/*List<Card> wins = state.getWinningCards();
 			List<Card> moves = state.availableActions();
 			System.out.print("Moves Available: ");
 			for (Card c:moves) {
@@ -145,7 +131,7 @@ public class Agent implements MSWAgent {
 			for (Card c:wins) {
 				System.out.print(c.toString()+" ");
 			}
-			System.out.println();
+			System.out.println();*/
 
 			//Expand Stage
 			List<Card> actions_to_expand = curr_node.unexploredActions(state.availableActions());
@@ -161,7 +147,6 @@ public class Agent implements MSWAgent {
 				// cards
 				curr_node = curr_node.addChild(action, state.player);
 				state.performAction(action);
-				System.out.println("Expansion: "+action);
 			}
 
 			//Play-Off Stage
@@ -187,10 +172,6 @@ public class Agent implements MSWAgent {
 			}
 			x++;
 		}
-
-		System.out.println("Trick: " + trick_count + " "+x);
-		trickToIteration[trick_count%16] += x;
-		trick_count++;
 		//System.out.println("Time: "+(System.currentTimeMillis()-startTime));
 		Collections.sort(curr_node.children,new NodeComparator());
 		/*System.out.print("Children: ");
@@ -198,7 +179,7 @@ public class Agent implements MSWAgent {
 				" ");
 		System.out.println();*/
 		Card c = curr_node.children.get(curr_node.children.size()-1).action;
-		System.out.println("Playing: " + c.toString());
+		//System.out.println("Playing: " + c.toString());
 		return c;
 	}
 

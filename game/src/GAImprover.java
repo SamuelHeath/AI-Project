@@ -19,8 +19,8 @@ public class GAImprover {
 	ArrayList<GameSimulatorGA> gameSimulators = new ArrayList();
 
 	public GAImprover() {
-		this.initial_population = 15;
-		this.generations = 15;
+		this.initial_population = 50;
+		this.generations = 100;
 	}
 
 	public GAImprover(int population, int gen, double init_exp_factor, int init_depth) {
@@ -118,7 +118,9 @@ public class GAImprover {
 			double variate = (double)(pos_neg)*r.nextDouble()/5.0; //max 0.1 change this is meant to
 			// fine tune it
 			int depth = (int)Math.floor(rep/100.0);
+			if ((rep%10.0)+variate < 0) variate *= -1; //Make it positive
 			double exp_factor = rep%10.0 + variate;
+			if (r.nextInt(4) == 0) depth += 1; //add depth
 			agentMap.put(gameSimulators.get(k).name,((double)depth*100.0)+exp_factor);
 			System.out.println("Mutated: " + rep+ " To " + ((double)depth*100.0 + exp_factor));
 		}

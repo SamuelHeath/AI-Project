@@ -25,7 +25,7 @@ public class GameSimulatorGA {
 		ArrayList<Card> deck = new ArrayList(Arrays.asList(Card.values()));
 		Collections.sort(deck, new CardComparator(true));
 
-		int games = 3;
+		int games = 2;
 		MossSideWhist game = new MossSideWhist(testingAgent, new Agent("Sam"),
 				new Agent("Sam1"));
 		game.playGame(games, System.out);

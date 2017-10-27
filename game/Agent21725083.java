@@ -259,7 +259,7 @@ class State {
 		player_hands[1] = new LinkedList();
 		player_hands[2] = new LinkedList();
 		num_tricks = 0;
-		max_tricks = max_depth;
+		max_tricks = max_depth; // 18 Moves ahead
 		num_wins = new int[] {0,0,0};
 	}
 
@@ -325,10 +325,10 @@ class State {
 		} else {
 			Card first = this.trick.get(0);
 			List<Card> playable = new LinkedList();
-				for (Card c : hand) {
-					if (c.suit == first.suit) playable.add(c);
-				}
-				if (playable.size() == 0) return hand;
+			for (Card c : hand) {
+				if (c.suit == first.suit) playable.add(c);
+			}
+			if (playable.size() == 0) return hand;
 			return playable;
 		}
 	}
@@ -371,12 +371,6 @@ class State {
 		}
 	}
 
-	/**
-	 * Returns the best suit this player has
-	 * @param player_index 		The player 0-2 we are checking
-	 * @param searchSuit		The suit 0-3 (see main agent for order) we want to see if they have
-	 * @return
-	 */
 	private Card getBestCardFromSuit(int player_index, Suit searchSuit) {
 		Card bestCard = null;
 		for (Card c: player_hands[player_index]) {
@@ -386,90 +380,74 @@ class State {
 		return bestCard;
 	}
 
-	/**
-	 * @param player_index		The player 0-2 we are checking to see if they have a specific suit
-	 * @param searchSuit		The suit we want to check for.
-	 * @return					True if the player has this card.
-	 */
 	public boolean playerHasSuit(int player_index, Suit searchSuit) {
 		for (Card c:player_hands[player_index]) if (c.suit==searchSuit) return true;
 		return false;
 	}
 
-	/**
-	 * @return					winningCards() but with all cards available
-	 */
 	public List<Card> getWinningCards() {
 		return getWinningCards(this.availableActions());
 	}
 
-	/**
-	 * @param availableMoves	The input list of cards we want to see has any good ones
-	 * @return					The List of good cards to choose
-	 */
 	public List<Card> getWinningCards(List<Card> availableMoves) {
 		List<Card> bestMoves = new LinkedList();
+		if (availableMoves.size() == 0) return bestMoves;
 		int player_next1 = (player+1)%3;
 		int player_next2 = (player+2)%3;
 		if (trick.size() == 0) {
-			Card highest = availableMoves.get(availableMoves.size()-1); //Play highest?
 			Card spade = null;
 			for (Card c:availableMoves) {
-					//if the player is missing a suit and doesnt have spades then play that card
-					if (!playerHasSuit(player_next1, c.suit) && !playerHasSuit(player_next2, c.suit) &&
-							!playerHasSuit(player_next1,Suit.SPADES) && !playerHasSuit(player_next2,Suit.SPADES)) {
+				//if the player is missing a suit and doesnt have spades then play that card
+				if (!playerHasSuit(player_next1, c.suit) && !playerHasSuit(player_next2, c.suit) &&
+						!playerHasSuit(player_next1,Suit.SPADES) && !playerHasSuit(player_next2,Suit.SPADES)) {
+					bestMoves.add(c);
+					//If they have your suit but couldnt beat your card add it
+				} else if (playerHasSuit(player_next1,c.suit) && playerHasSuit(player_next2,c.suit)) {
+					if (getBestCardFromSuit(player_next1, c.suit) != null && getBestCardFromSuit
+							(player_next1, c.suit).rank < c.rank && getBestCardFromSuit(player_next2, c.suit) !=
+							null && getBestCardFromSuit(player_next2, c.suit).rank < c.rank) {
 						bestMoves.add(c);
-						//If they have your suit but couldnt beat your card add it
-					} else if (playerHasSuit(player_next1,c.suit) && playerHasSuit(player_next2,c.suit)) {
-						if (getBestCardFromSuit(player_next1, c.suit) != null && getBestCardFromSuit
-								(player_next1, c.suit).rank < c.rank && getBestCardFromSuit(player_next2, c.suit) !=
-								null && getBestCardFromSuit(player_next1, c.suit).rank < c.rank) {
-							bestMoves.add(c);
-						}
-					} else { //Play the best card or lowest spade to draw out others spades
-						if (playerHasSuit(player,Suit.SPADES)) {
-							if (c.suit == Suit.SPADES && spade == null) spade = c;
-							if (spade != null && spade.rank > c.rank && c.suit == Suit.SPADES) {
-								spade = c; //Play lowest Spade to draw out the other plays spades and hopefully do
-								// above move.
-							}
-						}
-						if (c.rank > highest.rank && highest!=spade) highest = c;
 					}
-			}
-			if (!bestMoves.contains(highest)) {
-				//if (player==0)System.out.println("Highest: " + highest.toString());
-				bestMoves.add(highest);
+				} else { //Play the best card or lowest spade to draw out others spades
+					if (c.suit == Suit.SPADES) {
+						if (spade == null) spade = c;
+						if (spade != null && spade.rank > c.rank) {
+							spade = c; //Play lowest Spade to draw out the other plays spades and hopefully do
+							// above move.
+						}
+					}
+				}
 			}
 			if (!bestMoves.contains(spade) && spade!=null) {
-				//if (player==0)System.out.println("Lowest Spade: " +  spade.toString());
 				bestMoves.add(spade); // Lowest spade
 			}
-			if (bestMoves.size() > 0) return bestMoves;
-			else return availableMoves;
+			return bestMoves;
 		}
 		Card toBeat = trick.get(0);
 		Card orig = trick.get(0);
 		Collections.sort(availableMoves);
 		if (trick.size() == 1) {
 			if (playerHasSuit(player,orig.suit)) { //original suit
-				Card worst = availableMoves.get(0);
+				Card worst = availableMoves.get(0); //get worst.
 				for (Card c:availableMoves) {
 					if (c.suit == orig.suit) { //If we can play this
-						if (playerHasSuit(playerNext,orig.suit)) {
-							if (getBestCardFromSuit(player_next1,orig.suit) != null && getBestCardFromSuit(playerNext, orig.suit)
-									.rank< c.rank) {
-								bestMoves.add(c);
+						if (c.rank > orig.rank) { //if we can beat the original card with this one
+							if (playerHasSuit(playerNext, orig.suit)) { //can we beat the next player
+								if (getBestCardFromSuit(player_next1, orig.suit) != null && getBestCardFromSuit(playerNext, orig.suit)
+										.rank < c.rank) {
+									bestMoves.add(c);
+								} else {
+									if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c;
+								}
+								//If the next player doesnt have the correct suit
 							} else {
-								if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c;
-							}
-							//If the next player doesnt have the correct suit
-						} else {
-							//Wrong suit but they can play spades
-							if (playerHasSuit(playerNext,Suit.SPADES)) {
-								if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c; //Here we lose worst
-							} else {
-								if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c; //Here we win with worst
+								//Wrong suit but they can play spades
+								if (playerHasSuit(playerNext, Suit.SPADES)) {
+									if (worst.rank > c.rank && c.suit != Suit.SPADES) worst = c; //Here we lose worst
+								} else {
+									if (worst.rank > c.rank && c.suit != Suit.SPADES)
+										worst = c; //Here we win with worst
+								}
 							}
 						}
 					}
@@ -477,19 +455,17 @@ class State {
 				if (bestMoves.size() == 0) bestMoves.add(worst);
 				return bestMoves;
 			} else {
-				if (toBeat.suit != Suit.SPADES && !playerHasSuit(player,toBeat.suit) && playerHasSuit
-						(playerNext,Suit.SPADES)) {
-					Card bestNextCard = getBestCardFromSuit(playerNext, Suit.SPADES);
-					for (Card c : availableMoves) {
-						if (bestNextCard != null && c.suit == Suit.SPADES && c.rank > bestNextCard.rank)
-							bestMoves.add(c);
-					}
+				if (!playerHasSuit(playerNext, Suit.SPADES)) {
+					Card bestNextCard = getBestCardFromSuit(player, Suit.SPADES);
+					if (bestNextCard != null) bestMoves.add(bestNextCard);
 					return bestMoves; //Could be no best moves
 				}
+				bestMoves.add(availableMoves.get(0));
 			}
 		} else if (trick.size() == 2) { // 2 cards Played ur last player
 			Card c1 = trick.get(1);
-			if (c1.suit != orig.suit) {
+			Card worst = availableMoves.get(0);
+			if (c1.suit != toBeat.suit) {
 				if (c1.suit == Suit.SPADES) { //c1 will beat first card
 					toBeat = c1;
 				} //original is still the best card
@@ -504,17 +480,21 @@ class State {
 							bestMoves.add(c);
 						}
 					}
-					if (bestMoves.size() > 0) Collections.sort(bestMoves, new CardComparator(true));
+					if (bestMoves.size() == 0) {
+						bestMoves.add(worst);
+					}
+					return bestMoves;
+				} else if (c1.suit == Suit.SPADES) { //We have the correct suit but we're going to lose
+					bestMoves.add(worst);
 					return bestMoves;
 				}
-				//play worst move
 			} else {
 				if (playerHasSuit(player, Suit.SPADES)) {
 					//If we are able to beat the last player then play worst card that wins
-					if (c1.suit == Suit.SPADES && getBestCardFromSuit(player,Suit.SPADES) != null &&
-							getBestCardFromSuit(player,Suit.SPADES).rank > c1.rank) {
+					if (toBeat.suit == Suit.SPADES && getBestCardFromSuit(player,Suit.SPADES) != null &&
+							getBestCardFromSuit(player,Suit.SPADES).rank > toBeat.rank) {
 						for (Card c : availableMoves) { //For all cards find all that can win
-							if (c.suit == Suit.SPADES && c.rank > c1.rank) {
+							if (c.suit == Suit.SPADES && c.rank > toBeat.rank) {
 								bestMoves.add(c);
 							}
 						}
@@ -524,14 +504,13 @@ class State {
 					bestMoves.add(availableMoves.get(0)); //Worst
 					return bestMoves;
 				}
+				bestMoves.add(availableMoves.get(0));
+				return bestMoves;
 			}
 		}
 		return availableMoves;
 	}
 
-	/**
-	 * @return				The player index that won this trick.
-	 */
 	private int calcWinner() {
 		Card best = trick.get(0); //Index 0 is player to the left of the last player in the trick (player)
 		Suit s = best.suit;
@@ -553,10 +532,6 @@ class State {
 		}
 	}
 
-	/**
-	 * @param playerIndex			The player we want to see how many playoffs they've won.
-	 * @return						The number of wins this player has.
-	 */
 	public int getWins(int playerIndex) { return num_wins[playerIndex]; }
 
 	/**
@@ -579,6 +554,7 @@ class State {
 		return s;
 	}
 }
+
 // Used to store the information set which we determinise from to create a state for the player.
 class Node {
 
@@ -612,6 +588,9 @@ class Node {
 			if (available.contains(n.action)) { nodes.add(n); }
 		}
 		Collections.sort(nodes,new ISUCTComparator());
+		//System.out.println("UCT Scores: ");
+		//for (Node n:nodes) System.out.println(n.ISUCT() + " ");
+		//System.out.println("Selecting: "+nodes.get(nodes.size()-1).ISUCT());
 		return nodes.get(nodes.size()-1);
 	}
 
@@ -636,7 +615,7 @@ class Node {
 	 */
 	public double ISUCT() {
 		//Depending on time add heuristic (h(i)) which helps choose nodes via h(i)/num_visits.
-		return ((double) num_wins /(double) num_visits) + Agent21725083.explore*Math.sqrt(Math.log((double)parent
+		return ((double) num_wins /(double) num_visits) + Agent.explore*Math.sqrt(Math.log((double)parent
 				.num_visits)/(double) num_visits);
 	}
 
@@ -652,40 +631,7 @@ class ISUCTComparator implements Comparator<Node> {
 	@Override
 	public int compare(Node a, Node b) {
 		return Double.compare(a.ISUCT(), b.ISUCT());
+		//a.ISUCT() > b.ISUCT() ? -1 : a.ISUCT() < b.ISUCT() ? 1 : 0;
 	}
 
 }
-
-class CardComparator implements Comparator<Card> {
-    boolean sortBy; // sort by rank first?
-    boolean lowestWinningCard = false;
-
-    public CardComparator(boolean sortByRank) {
-        sortBy = sortByRank;
-    }
-
-    public CardComparator(boolean sortByRank, boolean lowestSpade) {
-        sortBy = sortByRank;
-        lowestWinningCard = lowestSpade;
-    }
-
-    @Override
-    public int compare(Card a, Card b) {
-        int x;
-        if (sortBy) {
-             x = Integer.compare(a.rank, b.rank);
-            if (x == 0) {
-                return a.suit.toString().compareTo(b.suit.toString());
-            }
-            else return x;
-        }
-        else if (lowestWinningCard) {
-            x = Integer.compare(a.rank,b.rank);
-            if (x == 0) {
-                return -1*a.suit.toString().compareTo(b.suit.toString());
-            } else return x;
-        }
-        else return a.toString().compareTo(b.toString());
-    }
-}
-
