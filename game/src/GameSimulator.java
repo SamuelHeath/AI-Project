@@ -10,7 +10,7 @@ public class GameSimulator {
 		Collections.sort(deck, new CardComparator(true));
 		Map<String,Integer> gameResult;
 
-		int rounds = 5;
+		int rounds = 1;
 		//MossSideWhist game = new MossSideWhist(new Agent(), new GreedyAgent(), new GreedyAgent());
         //System.out.println("simNumber, agent, final_score, number_rounds");
         MSWAgent a = new Agent("Carlos");
@@ -22,7 +22,11 @@ public class GameSimulator {
 		System.out.println("Number of rounds per game: " + 5);
 		System.out.println(a.sayName() + ",\t" + b.sayName() + ",\t" + c.sayName());
         for (int i = 0; i < 10; i++) {
-        	playGameManyTimes(10, rounds, a,b,c,0.0);
+        	playGameManyTimes(2, rounds, a,b,c,0.0);
+		}
+		Agent a_convert = (Agent)a;
+		for (int i = 0; i < 16; i++) {
+			System.out.println(a_convert.trickToIteration[i]);
 		}
 }
 

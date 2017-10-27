@@ -21,6 +21,9 @@ public class Agent implements MSWAgent {
 	boolean[][] playerHasSuit;
 	List<Card> hand;
 	List<Card> trick;
+	int trick_count = 1;
+
+	int[] trickToIteration = new int[16];
 
 	public Agent(double exploration, int depth) {
 		explore = exploration;
@@ -51,6 +54,7 @@ public class Agent implements MSWAgent {
 		for (Card c : deck) {
 			unSeen.add(c);
 		}
+		for (int i = 0; i < 16; i++) trickToIteration[i] = 0;
 		hand = new LinkedList();
 		trick = new LinkedList();
 		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
@@ -100,7 +104,7 @@ public class Agent implements MSWAgent {
      * @return the Card they wish to play.
      */
 	public Card playCard() {
-		long playTime = 180; // give 200ms to explore and respond.
+		long playTime = 190; // give 200ms to explore and respond.
 		long startTime = System.currentTimeMillis();
 		Node curr_node = new Node(null,null, -1);
 		State curr_state = new State(this.trick,0,this.unSeen,this.hand,dep,playerHasSuit); //0
@@ -114,7 +118,8 @@ public class Agent implements MSWAgent {
 
 		Random rand = new Random();
 		int x = 0;
-		while (System.currentTimeMillis()-startTime < playTime && x < 600) {
+		//System.out.println("Expansion: "+(int)(177.79*Math.exp(0.2995*trick_count)));
+		while (System.currentTimeMillis()-startTime < playTime) {
 			//Information Set Monte Carlo Tree Search updating curr_node and state.
 			State state = curr_state.clone(); // Copies the state
 			state.determinise(playerHasSuit);// Initially determinise, as this AI doesn't know what others have.
@@ -191,7 +196,8 @@ public class Agent implements MSWAgent {
 			x++;
 		}
 
-		//System.out.println("Num Nodes Fully Explored "+x);
+		//System.out.println(x);
+		trickToIteration[trick_count%16] += x;
 		//System.out.println("Time: "+(System.currentTimeMillis()-startTime));
 		Collections.sort(curr_node.children,new NodeComparator());
 		/*System.out.print("Children: ");
@@ -230,6 +236,7 @@ public class Agent implements MSWAgent {
      */
 	public void seeResult(String winner) {
 		trick.clear();
+		trick_count++;
 		if (winner.equals(this.name)) {
 
 		} else {
@@ -248,6 +255,7 @@ public class Agent implements MSWAgent {
 		hand.clear();
 		playerHasSuit = new boolean[][] {{true, true, true, true},{true, true, true, true},{true, true, true, true}};
 		lead = false;
+		trick_count = 0;
 		unSeen = new LinkedList(Arrays.asList(Card.values()));
 	}
 

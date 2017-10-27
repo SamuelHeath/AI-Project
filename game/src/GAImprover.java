@@ -11,6 +11,7 @@ public class GAImprover {
 	private int depth = 1;
 	Random r = new Random();
 	Integer count = 0;
+	int gen_count = 1;
 
 	Map<Integer,Double> agentMap = new HashMap();
 
@@ -18,7 +19,7 @@ public class GAImprover {
 
 	public GAImprover() {
 		this.initial_population = 15;
-		this.generations = 30;
+		this.generations = 15;
 	}
 
 	public GAImprover(int population, int gen, double init_exp_factor, int init_depth) {
@@ -65,6 +66,7 @@ public class GAImprover {
 				long time = System.currentTimeMillis();
 				game.run();
 				System.out.println("------------------------\nDONE "+" Time Taken: "+ (System.currentTimeMillis()-time) + "\n------------------------\n");
+				gen_count++;
 			}
 
 			int children = gameSimulators.size()/4;
@@ -74,7 +76,7 @@ public class GAImprover {
 				mutate();
 			}
 		}
-		Collections.sort(gameSimulators,new GameComparator());
+		Collections.sort(gameSimulators,new GameComparator(gen_count));
 		int size = gameSimulators.size();
 		if (size > 10) {
 			for (int i = size-1; i >= 0 ; i--) {
@@ -92,7 +94,7 @@ public class GAImprover {
 	}
 
 	public void evaluateFitness() {
-		Collections.sort(gameSimulators, new GameComparator());
+		Collections.sort(gameSimulators, new GameComparator(gen_count));
 		int remove_num = gameSimulators.size()/4; // remove 1 quarter percent of population
 		for (int j = 0; j < remove_num; j++) gameSimulators.remove(0); // Remove worst
 	}
@@ -112,7 +114,7 @@ public class GAImprover {
 			double rep = agentMap.get(gameSimulators.get(k).name);
 			int pos_neg = r.nextInt(1);
 			if (pos_neg == 0) pos_neg = -1;
-			double variate = (double)(pos_neg)*r.nextDouble()/10.0; //max 0.1 change this is meant to
+			double variate = (double)(pos_neg)*r.nextDouble()/5.0; //max 0.1 change this is meant to
 			// fine tune it
 			int depth = (int)Math.floor(rep/100.0);
 			double exp_factor = rep%10.0 + variate;
@@ -132,9 +134,12 @@ public class GAImprover {
 
 class GameComparator implements Comparator<GameSimulatorGA> {
 
+	int gen = 1;
+	public GameComparator(int generation_count) { this.gen = generation_count; }
+
 	@Override
 	public int compare(GameSimulatorGA a, GameSimulatorGA b) {
-			return Integer.compare(a.getWins(), b.getWins()); // reverse
+			return Integer.compare((int)Math.round((float)a.getWins()/(float)gen),(int)Math.round((float)b.getWins()/(float)gen)); // reverse
 	}
 
 }
